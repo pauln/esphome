@@ -22,13 +22,14 @@ void HOT Bufferex565::set_pixel(int x, int y, Color color) {
   if (x >= this->width_ || x < 0 || y >= this->height_ || y < 0)
     return;
 
-  uint16_t pos = get_pixel_buffer_position_(x, y);  
+  uint16_t pos = get_pixel_buffer_position_(x, y);
   const uint16_t color565 = color.to_565();
-  if ( this->buffer_[pos] == color565){
-     bitClear(this->to_write_field_, pos);  
+  if (this->buffer_[pos] == color565) {
+    ((this->to_write_field_) &= ~(1UL << (pos)));  // Clear the bit
     return;
   }
-  bitSet(this->to_write_field_, pos);
+  ((this->to_write_field_) |= (1UL << (pos)));  // Set bit
+
   this->buffer_[pos] = color565;
 }
 
