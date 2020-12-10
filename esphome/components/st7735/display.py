@@ -4,6 +4,7 @@ from esphome import pins
 from esphome.components import spi
 from esphome.components import display
 from esphome.core import coroutine
+from esphome.components.bufferex_base import bufferex_base, CONF_BUFFEREX_ID
 from esphome.const import CONF_DC_PIN, CONF_ID, CONF_LAMBDA, CONF_MODEL, CONF_RESET_PIN, CONF_PAGES
 from . import st7735_ns
 
@@ -15,8 +16,6 @@ CONF_DEVICEWIDTH = 'devicewidth'
 CONF_DEVICEHEIGHT = 'deviceheight'
 CONF_ROWSTART = 'rowstart'
 CONF_COLSTART = 'colstart'
-CONF_EIGHTBITCOLOR = 'eightbitcolor'
-CONF_USEBGR = 'usebgr'
 
 SPIST7735 = st7735_ns.class_('ST7735', cg.PollingComponent, display.DisplayBuffer, spi.SPIDevice)
 ST7735Model = st7735_ns.enum('ST7735Model')
@@ -44,10 +43,9 @@ CONFIG_SCHEMA = cv.All(ST7735_SCHEMA.extend({
     cv.Required(CONF_DEVICEHEIGHT):  cv.int_,
     cv.Required(CONF_COLSTART):  cv.int_,
     cv.Required(CONF_ROWSTART):  cv.int_,
-    cv.Optional(CONF_EIGHTBITCOLOR, default=False): cv.boolean,
-    cv.Optional(CONF_USEBGR, default=False):  cv.boolean,
+    cv.Required(CONF_BUFFEREX_ID): cv.use_id(bufferex_base),
 }).extend(cv.COMPONENT_SCHEMA).extend(spi.spi_device_schema()),
-                       cv.has_at_most_one_key(CONF_PAGES, CONF_LAMBDA))
+    cv.has_at_most_one_key(CONF_PAGES, CONF_LAMBDA))
 
 
 @coroutine
@@ -65,9 +63,10 @@ def setup_st7735(var, config):
 
 
 def to_code(config):
+    buff = yield cg.get_variable(config[CONF_BUFFEREX_ID])
     var = cg.new_Pvariable(config[CONF_ID], config[CONF_MODEL], config[CONF_DEVICEWIDTH],
                            config[CONF_DEVICEHEIGHT], config[CONF_COLSTART], config[CONF_ROWSTART],
-                           config[CONF_EIGHTBITCOLOR], config[CONF_USEBGR])
+                           buff)
     yield setup_st7735(var, config)
     yield spi.register_spi_device(var, config)
 

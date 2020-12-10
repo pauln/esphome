@@ -3,6 +3,7 @@
 #include "esphome/core/component.h"
 #include "esphome/components/spi/spi.h"
 #include "esphome/components/display/display_buffer.h"
+#include "esphome/components/bufferex_base/bufferex_base.h"
 
 namespace esphome {
 namespace st7735 {
@@ -37,7 +38,8 @@ class ST7735 : public PollingComponent,
                public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST, spi::CLOCK_POLARITY_LOW, spi::CLOCK_PHASE_LEADING,
                                      spi::DATA_RATE_8MHZ> {
  public:
-  ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean eightbitcolor, boolean usebgr);
+  ST7735(ST7735Model model, int width, int height, int colstart, int rowstart,
+         bufferex_base::BufferexBase *bufferex_base);
   void dump_config() override;
   void setup() override;
 
@@ -50,9 +52,10 @@ class ST7735 : public PollingComponent,
 
   void set_reset_pin(GPIOPin *value) { this->reset_pin_ = value; }
   void set_dc_pin(GPIOPin *value) { dc_pin_ = value; }
-  size_t get_buffer_length();
 
  protected:
+  bufferex_base::BufferexBase *bufferex_base_ = nullptr;
+
   void sendcommand_(uint8_t cmd, const uint8_t *data_bytes, uint8_t num_data_bytes);
   void senddata_(const uint8_t *data_bytes, uint8_t num_data_bytes);
 

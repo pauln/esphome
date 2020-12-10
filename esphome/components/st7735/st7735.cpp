@@ -220,15 +220,14 @@ static const uint8_t PROGMEM
 // clang-format on
 static const char *TAG = "st7735";
 
-ST7735::ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean eightbitcolor,
-               boolean usebgr) {
+ST7735::ST7735(ST7735Model model, int width, int height, int colstart, int rowstart,
+               bufferex_base::BufferexBase *bufferex_base) {
   model_ = model;
   this->width_ = width;
   this->height_ = height;
   this->colstart_ = colstart;
   this->rowstart_ = rowstart;
-  this->eightbitcolor_ = eightbitcolor;
-  this->usebgr_ = usebgr;
+  this->bufferex_base_ = bufferex_base;
 }
 
 void ST7735::setup() {
@@ -283,8 +282,10 @@ void ST7735::setup() {
   }
   sendcommand_(ST77XX_MADCTL, &data, 1);
 
-  this->init_internal_(this->get_buffer_length());
-  memset(this->buffer_, 0x00, this->get_buffer_length());
+  bufferex_base_->init_buffer(this->width_, this->height_);
+
+  // this->buffer_ = bufferex_base_->buffer_;
+  // this->clear();
 }
 
 void ST7735::update() {
@@ -296,27 +297,8 @@ int ST7735::get_height_internal() { return height_; }
 
 int ST7735::get_width_internal() { return width_; }
 
-size_t ST7735::get_buffer_length() {
-  if (this->eightbitcolor_) {
-    return size_t(this->get_width_internal()) * size_t(this->get_height_internal());
-  }
-  return size_t(this->get_width_internal()) * size_t(this->get_height_internal()) * 2;
-}
-
 void HOT ST7735::draw_absolute_pixel_internal(int x, int y, Color color) {
-  if (x >= this->get_width_internal() || x < 0 || y >= this->get_height_internal() || y < 0)
-    return;
-
-  if (this->eightbitcolor_) {
-    const uint32_t color332 = color.to_332();
-    uint16_t pos = (x + y * this->get_width_internal());
-    this->buffer_[pos] = color332;
-  } else {
-    const uint32_t color565 = color.to_565();
-    uint16_t pos = (x + y * this->get_width_internal()) * 2;
-    this->buffer_[pos++] = (color565 >> 8) & 0xff;
-    this->buffer_[pos] = color565 & 0xff;
-  }
+  this->bufferex_base_->set_pixel(x, y, color);
 }
 
 void ST7735::init_reset_() {
@@ -374,7 +356,7 @@ void ST7735::dump_config() {
   LOG_PIN("  CS Pin: ", this->cs_);
   LOG_PIN("  DC Pin: ", this->dc_pin_);
   LOG_PIN("  Reset Pin: ", this->reset_pin_);
-  ESP_LOGD(TAG, "  Buffer Size: %zu", this->get_buffer_length());
+  ESP_LOGD(TAG, "  Buffer Size: %zu", this->bufferex_base_->get_buffer_length());
   ESP_LOGD(TAG, "  Height: %d", this->height_);
   ESP_LOGD(TAG, "  Width: %d", this->width_);
   ESP_LOGD(TAG, "  ColStart: %d", this->colstart_);
@@ -441,18 +423,15 @@ void HOT ST7735::write_display_data_() {
   this->write_byte(ST77XX_RAMWR);
   this->dc_pin_->digital_write(true);
 
-  if (this->eightbitcolor_) {
-    for (int line = 0; line < this->get_buffer_length(); line = line + this->get_width_internal()) {
-      for (int index = 0; index < this->get_width_internal(); ++index) {
-        auto color = Color(this->buffer_[index + line], Color::ColorOrder::COLOR_ORDER_RGB,
-                           Color::ColorBitness::COLOR_BITNESS_332, true)
-                         .to_565();
-        this->write_byte((color >> 8) & 0xff);
-        this->write_byte(color & 0xff);
-      }
+  // if (this->bufferex_base_->get_pixel_bit_size() == 16) {  // 16bit just write. I am a 565 display
+  //   this->write_array(this->bufferex_base_->buffer_, this->bufferex_base_->get_buffer_length());
+  // } else {
+  for (int y = 0; y < this->get_height_internal(); ++y) {
+    for (int x = 0; x < this->get_width_internal(); ++x) {
+      auto color = this->bufferex_base_->get_pixel_to_565(x, y);
+      this->write_byte((color >> 8) & 0xff);
+      this->write_byte(color & 0xff);
     }
-  } else {
-    this->write_array(this->buffer_, this->get_buffer_length());
   }
   this->disable();
 }
