@@ -235,5 +235,5 @@ static const uint8_t INITR_18REDTAB = INITR_REDTAB;
 static const uint8_t INITR_18BLACKTAB = INITR_BLACKTAB;
 
 
-}  // namespace st7735_defines
+}  // namespace st7735
 }  // namespace esphome
