@@ -55,7 +55,7 @@ class ST7735 : public PollingComponent,
   void writecommand_(uint8_t value);
   void writedata_(uint8_t value);
   void fill_internal_(Color color);
-  void display_buffer();
+  void display_buffer_();
   void init_reset_();
   void display_init_(const uint8_t *addr);
   void spi_master_write_addr_(uint16_t addr1, uint16_t addr2);

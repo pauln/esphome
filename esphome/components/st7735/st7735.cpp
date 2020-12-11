@@ -89,7 +89,7 @@ void ST7735::fill_internal_(Color color) {
 
 void ST7735::update() {
   this->do_update_();
-  this->display_buffer();
+  this->display_buffer_();
   this->bufferex_base_->display();
 }
 
