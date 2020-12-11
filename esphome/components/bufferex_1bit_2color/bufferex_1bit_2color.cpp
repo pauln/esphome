@@ -19,8 +19,8 @@ void Bufferex1bit2color::init_buffer(int width, int height) {
 
 void Bufferex1bit2color::fill_buffer(Color color) {
   bufferex_base::BufferexBase::fill_buffer(color);
-  ESP_LOGD(TAG,"fill_buffer color: %d",color.to_565());
-  memset(this->buffer_,color.r + color.b + color.g  == 0 ? 0:1 , this->get_buffer_length());
+  ESP_LOGD(TAG, "fill_buffer color: %d", color.to_565());
+  memset(this->buffer_, color.r + color.b + color.g == 0 ? 0 : 1, this->get_buffer_length());
 }
 
 uint16_t Bufferex1bit2color::get_pixel_buffer_position_internal_(int x, int y) { return (x + y * this->width_); }
@@ -48,8 +48,8 @@ uint16_t Bufferex1bit2color::get_pixel_to_565(int x, int y) {
 }
 
 uint16_t Bufferex1bit2color::get_pixel_to_565(uint16_t pos) {
-  const uint16_t byte_location =pos / 8;
-  const uint8_t byte_offset =pos - (byte_location * 8);
+  const uint16_t byte_location = pos / 8;
+  const uint8_t byte_offset = pos - (byte_location * 8);
 
   auto color_byte = this->buffer_[byte_location];
   auto color_bit = (color_byte >> byte_offset) & 1U;
@@ -66,9 +66,7 @@ size_t Bufferex1bit2color::get_buffer_length() {
   return buffsize;
 }
 
-size_t Bufferex1bit2color::get_buffer_size() {
-  return this->get_buffer_length();
-}
+size_t Bufferex1bit2color::get_buffer_size() { return this->get_buffer_length(); }
 
 }  // namespace bufferex_1bit_2color
 }  // namespace esphome

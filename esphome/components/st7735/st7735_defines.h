@@ -7,7 +7,7 @@
 
 namespace esphome {
 namespace st7735 {
-    static const uint8_t ST_CMD_DELAY = 0x80;  // special signifier for command lists
+static const uint8_t ST_CMD_DELAY = 0x80;  // special signifier for command lists
 
 static const uint8_t ST77XX_NOP = 0x00;
 static const uint8_t ST77XX_SWRESET = 0x01;

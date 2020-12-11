@@ -21,8 +21,8 @@ void Bufferex332::fill_buffer(Color color) {
   bufferex_base::BufferexBase::fill_buffer(color);
 
   auto color332 = color.to_332();
-  ESP_LOGD(TAG,"fill_buffer color: %d",color332);
-  memset(this->buffer_,color332, this->get_buffer_length());
+  ESP_LOGD(TAG, "fill_buffer color: %d", color332);
+  memset(this->buffer_, color332, this->get_buffer_length());
 }
 
 void HOT Bufferex332::set_buffer(int x, int y, Color color) {
@@ -35,9 +35,7 @@ uint16_t Bufferex332::get_pixel_to_565(int x, int y) {
   return this->get_pixel_to_565(pos);
 }
 
-size_t Bufferex332::get_buffer_size() {
-  return this->get_buffer_length();
-}
+size_t Bufferex332::get_buffer_size() { return this->get_buffer_length(); }
 
 uint16_t Bufferex332::get_pixel_to_565(uint16_t pos) {
   return Color(this->buffer_[pos], Color::ColorOrder::COLOR_ORDER_RGB, Color::ColorBitness::COLOR_BITNESS_332, true)

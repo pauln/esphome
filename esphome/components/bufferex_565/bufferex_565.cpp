@@ -21,12 +21,10 @@ void Bufferex565::fill_buffer(Color color) {
   bufferex_base::BufferexBase::fill_buffer(color);
 
   auto color565 = color.to_565();
-  ESP_LOGD(TAG,"fill_buffer color: %d",color565);
-  memset(this->buffer_,color565, this->get_buffer_length());
+  ESP_LOGD(TAG, "fill_buffer color: %d", color565);
+  memset(this->buffer_, color565, this->get_buffer_length());
 }
-size_t Bufferex565::get_buffer_size(){
-  return this->get_buffer_length()*2;
-}
+size_t Bufferex565::get_buffer_size() { return this->get_buffer_length() * 2; }
 
 void HOT Bufferex565::set_buffer(int x, int y, Color color) {
   uint16_t pos = get_pixel_buffer_position_(x, y);
@@ -39,9 +37,7 @@ uint16_t Bufferex565::get_pixel_to_565(int x, int y) {
   return this->get_pixel_to_565(pos);
 }
 
-uint16_t Bufferex565::get_pixel_to_565(uint16_t pos) {
-  return this->buffer_[pos];
-}
+uint16_t Bufferex565::get_pixel_to_565(uint16_t pos) { return this->buffer_[pos]; }
 
 }  // namespace bufferex_565
 }  // namespace esphome

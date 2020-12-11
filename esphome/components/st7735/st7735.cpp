@@ -199,7 +199,7 @@ void HOT ST7735::senddata_(const uint8_t *data_bytes, uint8_t num_data_bytes) {
   this->disable();
 }
 
-void HOT ST7735::display_buffer() {
+void HOT ST7735::display_buffer_() {
   ESP_LOGD(TAG, "Asked to write %d pixels", this->pixel_count_);
   const int w = this->bufferex_base_->x_high_ - this->bufferex_base_->x_low_ + 1;
   const int h = this->bufferex_base_->y_high_ - this->bufferex_base_->y_low_ + 1;

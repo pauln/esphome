@@ -9,7 +9,6 @@
 namespace esphome {
 namespace st7735 {
 
-
 enum ST7735Model {
   ST7735_INITR_GREENTAB = INITR_GREENTAB,
   ST7735_INITR_REDTAB = INITR_REDTAB,
@@ -23,7 +22,7 @@ class ST7735 : public PollingComponent,
                public display::DisplayBuffer,
                public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST, spi::CLOCK_POLARITY_LOW, spi::CLOCK_PHASE_LEADING,
                                      spi::DATA_RATE_15MHZ> {
-                                       //TSCYCW = 66ns so 1/66ns = ~ 15MHZ
+  // TSCYCW = 66ns so 1/66ns = ~ 15MHZ
  public:
   ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean usebgr,
          bufferex_base::BufferexBase *bufferex_base);
@@ -38,7 +37,7 @@ class ST7735 : public PollingComponent,
   void set_dc_pin(GPIOPin *value) { dc_pin_ = value; }
 
  protected:
-  uint16_t pixel_count_=0;
+  uint16_t pixel_count_ = 0;
   boolean usebgr_ = false;
   bufferex_base::BufferexBase *bufferex_base_ = nullptr;
 
@@ -46,7 +45,7 @@ class ST7735 : public PollingComponent,
   void fill(Color color) override;
   int get_width_internal() override;
   int get_height_internal() override;
-  void display_clear() override {};
+  void display_clear() override{};
 
   void sendcommand_(uint8_t cmd, const uint8_t *data_bytes, uint8_t num_data_bytes);
   void senddata_(const uint8_t *data_bytes, uint8_t num_data_bytes);
