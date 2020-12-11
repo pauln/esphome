@@ -21,6 +21,7 @@ void DisplayBuffer::init_internal_(uint32_t buffer_length) {
 }
 void DisplayBuffer::fill(Color color) { this->filled_rectangle(0, 0, this->get_width(), this->get_height(), color); }
 void DisplayBuffer::clear() { this->fill(COLOR_OFF); }
+void DisplayBuffer::display_clear() { this->clear(); }
 int DisplayBuffer::get_width() {
   switch (this->rotation_) {
     case DISPLAY_ROTATION_90_DEGREES:
@@ -319,7 +320,7 @@ void DisplayBuffer::show_page(DisplayPage *page) { this->page_ = page; }
 void DisplayBuffer::show_next_page() { this->page_->show_next(); }
 void DisplayBuffer::show_prev_page() { this->page_->show_prev(); }
 void DisplayBuffer::do_update_() {
-  this->clear();
+  this->display_clear();
   if (this->page_ != nullptr) {
     this->page_->get_writer()(*this);
   } else if (this->writer_.has_value()) {

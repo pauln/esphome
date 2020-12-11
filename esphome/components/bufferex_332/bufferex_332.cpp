@@ -17,20 +17,32 @@ void Bufferex332::init_buffer(int width, int height) {
   memset(this->buffer_, 0x00, this->get_buffer_length());
 }
 
-void HOT Bufferex332::set_pixel(int x, int y, Color color) {
-  if (x >= this->width_ || x < 0 || y >= this->height_ || y < 0)
-    return;
+void Bufferex332::fill_buffer(Color color) {
+  bufferex_base::BufferexBase::fill_buffer(color);
 
-  const uint16_t pos = get_pixel_buffer_position_(x, y);
-  const uint8_t color332 = color.to_332();
-
-  this->buffer_[pos] = color332;
+  auto color332 = color.to_332();
+  ESP_LOGD(TAG,"fill_buffer color: %d",color332);
+  memset(this->buffer_,color332, this->get_buffer_length());
 }
 
+void HOT Bufferex332::set_buffer(int x, int y, Color color) {
+  uint16_t pos = get_pixel_buffer_position_(x, y);
+  const uint16_t color332 = color.to_332();
+  this->buffer_[pos] = color332;
+}
 uint16_t Bufferex332::get_pixel_to_565(int x, int y) {
   const uint16_t pos = get_pixel_buffer_position_(x, y);
+  return this->get_pixel_to_565(pos);
+}
+
+size_t Bufferex332::get_buffer_size() {
+  return this->get_buffer_length();
+}
+
+uint16_t Bufferex332::get_pixel_to_565(uint16_t pos) {
   return Color(this->buffer_[pos], Color::ColorOrder::COLOR_ORDER_RGB, Color::ColorBitness::COLOR_BITNESS_332, true)
       .to_565();
 }
+
 }  // namespace bufferex_332
 }  // namespace esphome

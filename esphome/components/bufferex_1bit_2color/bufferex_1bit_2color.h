@@ -7,10 +7,14 @@ namespace bufferex_1bit_2color {
 class Bufferex1bit2color : public bufferex_base::BufferexBase {
  public:
   uint8_t *buffer_{nullptr};
+
   void init_buffer(int width, int height) override;
-  void set_pixel(int x, int y, Color color) override;
+  void set_buffer(int x, int y, Color color) override;
+  void fill_buffer(Color color) override;
   uint16_t get_pixel_to_565(int x, int y) override;
+  uint16_t get_pixel_to_565(uint16_t pos) override;
   size_t get_buffer_length() override;
+  size_t get_buffer_size() override;
 
   void set_color_off(Color color) { color_off_ = color; }
   void set_color_on(Color color) { color_on_ = color; }
