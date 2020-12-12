@@ -86,10 +86,9 @@ def setup_st7735(var, config):
 def to_code(config):
 
     if CONF_BUFFEREX_ID not in config:
-        buffer_565_default = ID('buffer_565_default')
+        buffer_565_default = ID('bufferex_565_bufferex565')
         buffer_565_default.type = bufferex_565
         config[CONF_BUFFEREX_ID] = buffer_565_default
-        buffer_pointer = cg.new_Pvariable(buffer_565_default)
 
     buffer_pointer = yield cg.get_variable(config[CONF_BUFFEREX_ID])
     var = cg.new_Pvariable(
