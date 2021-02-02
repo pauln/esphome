@@ -1,4 +1,4 @@
-#include "esphome/components/bufferex_base/bufferex_base.h"
+#include "bufferex_base.h"
 
 namespace esphome {
 namespace bufferex_base {

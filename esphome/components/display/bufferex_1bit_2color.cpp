@@ -1,4 +1,4 @@
-#include "esphome/components/bufferex_1bit_2color/bufferex_1bit_2color.h"
+#include "bufferex_1bit_2color.h"
 
 namespace esphome {
 namespace bufferex_1bit_2color {

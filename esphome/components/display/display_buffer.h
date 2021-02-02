@@ -4,6 +4,7 @@
 #include "esphome/core/defines.h"
 #include "esphome/core/automation.h"
 #include "esphome/core/color.h"
+#include "bufferex_base.h"
 
 #ifdef USE_TIME
 #include "esphome/components/time/real_time_clock.h"
@@ -299,6 +300,15 @@ class DisplayBuffer {
   /// Internal method to set the display rotation with.
   void set_rotation(DisplayRotation rotation);
 
+  void set_buffer(bufferex_base::BufferexBase *bufferex_base) { this->bufferex_base_ = bufferex_base; }
+  size_t get_buffer_length();
+  void set_pixel(int x, int y, Color color);
+  size_t get_buffer_size();
+  void fill_buffer(Color color);
+  uint16_t get_pixel_to_565(int x, int y);
+  uint16_t get_pixel_to_565(uint16_t pos);
+  void init_buffer(int width, int height);
+
  protected:
   void vprintf_(int x, int y, Font *font, Color color, TextAlign align, const char *format, va_list arg);
 
@@ -315,6 +325,8 @@ class DisplayBuffer {
   void do_update_();
 
   uint8_t *buffer_{nullptr};
+  bufferex_base::BufferexBase *bufferex_base_ = nullptr;
+
   DisplayRotation rotation_{DISPLAY_ROTATION_0_DEGREES};
   optional<display_writer_t> writer_{};
   DisplayPage *page_{nullptr};

@@ -3,9 +3,8 @@ import esphome.config_validation as cv
 from esphome import pins
 from esphome.components import spi
 from esphome.components import display
-from esphome.core import coroutine, ID
-from esphome.components.bufferex_base import bufferex_base, CONF_BUFFEREX_ID
-from esphome.components.bufferex_565 import bufferex_565
+from esphome.core import coroutine
+
 from esphome.const import (
     CONF_DC_PIN,
     CONF_ID,
@@ -17,7 +16,6 @@ from esphome.const import (
 from . import st7735_ns
 
 CODEOWNERS = ["@SenexCrenshaw"]
-AUTO_LOAD = ['bufferex_565']
 
 DEPENDENCIES = ["spi"]
 
@@ -58,7 +56,6 @@ CONFIG_SCHEMA = cv.All(
             cv.Required(CONF_DEVICEHEIGHT): cv.int_,
             cv.Required(CONF_COLSTART): cv.int_,
             cv.Required(CONF_ROWSTART): cv.int_,
-            cv.Optional(CONF_BUFFEREX_ID): cv.use_id(bufferex_base),
             cv.Optional(CONF_USEBGR, default=False): cv.boolean,
         }
     )
@@ -84,13 +81,6 @@ def setup_st7735(var, config):
 
 
 def to_code(config):
-
-    if CONF_BUFFEREX_ID not in config:
-        buffer_565_default = ID('bufferex_565_bufferex565')
-        buffer_565_default.type = bufferex_565
-        config[CONF_BUFFEREX_ID] = buffer_565_default
-
-    buffer_pointer = yield cg.get_variable(config[CONF_BUFFEREX_ID])
     var = cg.new_Pvariable(
         config[CONF_ID],
         config[CONF_MODEL],
@@ -99,7 +89,6 @@ def to_code(config):
         config[CONF_COLSTART],
         config[CONF_ROWSTART],
         config[CONF_USEBGR],
-        buffer_pointer,
     )
     yield setup_st7735(var, config)
     yield spi.register_spi_device(var, config)

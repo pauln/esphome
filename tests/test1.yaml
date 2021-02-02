@@ -223,14 +223,6 @@ adalight:
 mcp3008:
   - id: 'mcp3008_hub'
     cs_pin: GPIO12
-bufferex_332:
-  id: bufferex_buff332
-
-bufferex_565:
-  id: bufferex_buff565
-
-bufferex_1bit_2color:
-  id: bufferex_buff1
 
 mcp23s08:
   - id: 'mcp23s08_hub'
@@ -1829,7 +1821,10 @@ display:
     deviceheight: 160
     colstart: 0
     rowstart: 0
-    #bufferex_id: bufferex_buff565
+    buffer:
+      type: RGB1BIT
+      color_on: kbx_red
+      color_off: kbx_blue
     lambda: |-
       it.rectangle(0, 0, it.get_width(), it.get_height());
 tm1651:

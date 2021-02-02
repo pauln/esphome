@@ -3,7 +3,6 @@
 #include "esphome/core/component.h"
 #include "esphome/components/spi/spi.h"
 #include "esphome/components/display/display_buffer.h"
-#include "esphome/components/bufferex_base/bufferex_base.h"
 
 namespace esphome {
 namespace st7735 {

@@ -3,7 +3,6 @@
 #include "esphome/core/component.h"
 #include "esphome/components/spi/spi.h"
 #include "esphome/components/display/display_buffer.h"
-#include "esphome/components/bufferex_base/bufferex_base.h"
 #include "st7735_defines.h"
 
 namespace esphome {
@@ -24,8 +23,7 @@ class ST7735 : public PollingComponent,
                                      spi::DATA_RATE_15MHZ> {
   // TSCYCW = 66ns so 1/66ns = ~ 15MHZ
  public:
-  ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean usebgr,
-         bufferex_base::BufferexBase *bufferex_base);
+  ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean usebgr);
   void dump_config() override;
   void setup() override;
   void update() override;
@@ -39,7 +37,6 @@ class ST7735 : public PollingComponent,
  protected:
   uint16_t pixel_count_ = 0;
   boolean usebgr_ = false;
-  bufferex_base::BufferexBase *bufferex_base_ = nullptr;
 
   void draw_absolute_pixel_internal(int x, int y, Color color) override;
   void fill(Color color) override;

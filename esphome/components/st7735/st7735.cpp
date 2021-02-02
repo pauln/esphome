@@ -8,15 +8,13 @@ namespace st7735 {
 // clang-format on
 static const char *TAG = "st7735";
 
-ST7735::ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean usebgr,
-               bufferex_base::BufferexBase *bufferex_base) {
+ST7735::ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean usebgr) {
   model_ = model;
   this->width_ = width;
   this->height_ = height;
   this->colstart_ = colstart;
   this->rowstart_ = rowstart;
   this->usebgr_ = usebgr;
-  this->bufferex_base_ = bufferex_base;
 }
 
 void ST7735::setup() {
@@ -71,7 +69,7 @@ void ST7735::setup() {
   }
   sendcommand_(ST77XX_MADCTL, &data, 1);
 
-  bufferex_base_->init_buffer(this->width_, this->height_);
+  this->init_buffer(this->width_, this->height_);
   this->fill_internal_(COLOR_BLACK);
 }
 
@@ -80,7 +78,7 @@ void ST7735::fill_internal_(Color color) {
   this->start_data_();
 
   auto color565 = color.to_565();
-  for (uint32_t i = 0; i < this->bufferex_base_->get_buffer_length(); i++) {
+  for (uint32_t i = 0; i < this->get_buffer_length(); i++) {
     this->write_byte(color565 >> 8);
     this->write_byte(color565);
   }
@@ -99,7 +97,7 @@ int ST7735::get_width_internal() { return width_; }
 
 void HOT ST7735::draw_absolute_pixel_internal(int x, int y, Color color) {
   pixel_count_++;
-  this->bufferex_base_->set_pixel(x, y, color);
+  this->set_pixel(x, y, color);
 }
 
 void ST7735::init_reset_() {
@@ -157,8 +155,8 @@ void ST7735::dump_config() {
   LOG_PIN("  CS Pin: ", this->cs_);
   LOG_PIN("  DC Pin: ", this->dc_pin_);
   LOG_PIN("  Reset Pin: ", this->reset_pin_);
-  ESP_LOGD(TAG, "  Buffer Length: %zu", this->bufferex_base_->get_buffer_length());
-  ESP_LOGD(TAG, "  Buffer Size: %zu", this->bufferex_base_->get_buffer_size());
+  ESP_LOGD(TAG, "  Buffer Length: %zu", this->get_buffer_length());
+  ESP_LOGD(TAG, "  Buffer Size: %zu", this->get_buffer_size());
   ESP_LOGD(TAG, "  Height: %d", this->height_);
   ESP_LOGD(TAG, "  Width: %d", this->width_);
   ESP_LOGD(TAG, "  ColStart: %d", this->colstart_);
@@ -166,7 +164,7 @@ void ST7735::dump_config() {
   LOG_UPDATE_INTERVAL(this);
 }
 
-void ST7735::fill(Color color) { this->bufferex_base_->fill_buffer(color); }
+void ST7735::fill(Color color) { this->fill_buffer(color); }
 
 void HOT ST7735::writecommand_(uint8_t value) {
   this->enable();
@@ -212,7 +210,7 @@ void HOT ST7735::display_buffer_() {
     for (uint16_t col = 0; col < w; col++) {
       uint32_t pos = start_pos + (row * width_) + col;
 
-      auto color = this->bufferex_base_->get_pixel_to_565(pos);
+      auto color = this->get_pixel_to_565(pos);
       this->write_byte(color >> 8);
       this->write_byte(color);
     }
@@ -249,12 +247,9 @@ void ST7735::set_addr_window_(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h) 
   this->write_byte(ST77XX_RAMWR);
   this->dc_pin_->digital_write(true);
 
-  // if (this->bufferex_base_->get_pixel_bit_size() == 16) {  // 16bit just write. I am a 565 display
-  //   this->write_array(this->bufferex_base_->buffer_, this->bufferex_base_->get_buffer_length());
-  // } else {
   for (int y = 0; y < this->get_height_internal(); ++y) {
     for (int x = 0; x < this->get_width_internal(); ++x) {
-      auto color = this->bufferex_base_->get_pixel_to_565(x, y);
+      auto color = this->get_pixel_to_565(x, y);
       this->write_byte((color >> 8) & 0xff);
       this->write_byte(color & 0xff);
     }
