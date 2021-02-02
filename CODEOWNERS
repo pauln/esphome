@@ -20,10 +20,6 @@ esphome/components/atc_mithermometer/* @ahpohl
 esphome/components/bang_bang/* @OttoWinter
 esphome/components/binary_sensor/* @esphome/core
 esphome/components/canbus/* @danielschramm @mvturnho
-esphome/components/bufferex_1bit_2color/* @SenexCrenshaw
-esphome/components/bufferex_332/* @SenexCrenshaw
-esphome/components/bufferex_565/* @SenexCrenshaw
-esphome/components/bufferex_base/* @SenexCrenshaw
 esphome/components/captive_portal/* @OttoWinter
 esphome/components/climate/* @esphome/core
 esphome/components/climate_ir/* @glmnet
