@@ -2,9 +2,9 @@
 #include "bufferex_base.h"
 
 namespace esphome {
-namespace bufferex_1bit_2color {
+namespace display {
 
-class Bufferex1bit2color : public bufferex_base::BufferexBase {
+class Bufferex1bit2color : public display::BufferexBase {
  public:
   uint8_t *buffer_{nullptr};
 
@@ -24,5 +24,5 @@ class Bufferex1bit2color : public bufferex_base::BufferexBase {
   Color color_off_ = COLOR_BLACK;
   uint16_t get_pixel_buffer_position_internal_(int x, int y);
 };  // class Bufferex332
-}  // namespace bufferex_1bit_2color
+}  // namespace display
 }  // namespace esphome

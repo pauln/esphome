@@ -1,7 +1,7 @@
 #include "bufferex_base.h"
 
 namespace esphome {
-namespace bufferex_base {
+namespace display {
 static const char *TAG = "bufferex_base";
 
 size_t BufferexBase::get_buffer_length() { return size_t(this->width_) * size_t(this->height_); }
@@ -34,5 +34,5 @@ void BufferexBase::fill_buffer(Color color) {
   this->y_high_ = this->height_ - 1;
 }
 
-}  // namespace bufferex_base
+}  // namespace display
 }  // namespace esphome

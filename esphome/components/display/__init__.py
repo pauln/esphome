@@ -11,19 +11,6 @@ CONF_COLOR_OFF = "color_off"
 CONF_COLOR_ON = "color_on"
 CONF_BUFFER_ID = "buffer_id"
 
-bufferex_base_ns = cg.esphome_ns.namespace("bufferex_base")
-bufferex_base = bufferex_base_ns.class_("BufferexBase")
-
-bufferex_565_ns = cg.esphome_ns.namespace("bufferex_565")
-bufferex_565 = bufferex_565_ns.class_("Bufferex565", bufferex_base)
-
-bufferex_332_ns = cg.esphome_ns.namespace("bufferex_332")
-bufferex_332 = bufferex_332_ns.class_("Bufferex332", bufferex_base)
-
-bufferex_1bit_2color_ns = cg.esphome_ns.namespace("bufferex_1bit_2color")
-bufferex_1bit_2color = bufferex_1bit_2color_ns.class_(
-    "Bufferex1bit2color", bufferex_base
-)
 
 IS_PLATFORM_COMPONENT = True
 
@@ -40,7 +27,12 @@ DisplayPageShowPrevAction = display_ns.class_(
     "DisplayPageShowPrevAction", automation.Action
 )
 
-BufferType = bufferex_base_ns.enum("BufferType")
+bufferex_base = display_ns.class_("BufferexBase")
+bufferex_565 = display_ns.class_("Bufferex565")
+bufferex_332 = display_ns.class_("Bufferex332")
+bufferex_1bit_2color = display_ns.class_("Bufferex1bit2color")
+
+BufferType = display_ns.enum("BufferType")
 
 TYPES = {
     "RGB565": BufferType.RGB565,

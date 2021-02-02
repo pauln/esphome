@@ -1,13 +1,13 @@
 #include "bufferex_565.h"
 
 namespace esphome {
-namespace bufferex_565 {
+namespace display {
 static const char *TAG = "bufferex_565";
 
 void Bufferex565::init_buffer(int width, int height) {
   this->width_ = width;
   this->height_ = height;
-  this->buffer_type_ = bufferex_base::BufferType::BUFFER_TYPE_565;
+  this->buffer_type_ = display::BufferType::BUFFER_TYPE_565;
 
   this->buffer_ = new uint16_t[this->get_buffer_length()];
   if (this->buffer_ == nullptr) {
@@ -18,7 +18,7 @@ void Bufferex565::init_buffer(int width, int height) {
 }
 
 void Bufferex565::fill_buffer(Color color) {
-  bufferex_base::BufferexBase::fill_buffer(color);
+  display::BufferexBase::fill_buffer(color);
 
   auto color565 = color.to_565();
   ESP_LOGD(TAG, "fill_buffer color: %d", color565);
@@ -39,5 +39,5 @@ uint16_t Bufferex565::get_pixel_to_565(int x, int y) {
 
 uint16_t Bufferex565::get_pixel_to_565(uint16_t pos) { return this->buffer_[pos]; }
 
-}  // namespace bufferex_565
+}  // namespace display
 }  // namespace esphome

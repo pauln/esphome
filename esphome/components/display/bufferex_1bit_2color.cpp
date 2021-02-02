@@ -1,13 +1,13 @@
 #include "bufferex_1bit_2color.h"
 
 namespace esphome {
-namespace bufferex_1bit_2color {
+namespace display {
 static const char *TAG = "bufferex_1bit_2color";
 
 void Bufferex1bit2color::init_buffer(int width, int height) {
   this->width_ = width;
   this->height_ = height;
-  this->buffer_type_ = bufferex_base::BufferType::BUFFER_TYPE_1BIT;
+  this->buffer_type_ = display::BufferType::BUFFER_TYPE_1BIT;
 
   this->buffer_ = new uint8_t[this->get_buffer_length()];
   if (this->buffer_ == nullptr) {
@@ -18,7 +18,7 @@ void Bufferex1bit2color::init_buffer(int width, int height) {
 }
 
 void Bufferex1bit2color::fill_buffer(Color color) {
-  bufferex_base::BufferexBase::fill_buffer(color);
+  display::BufferexBase::fill_buffer(color);
   ESP_LOGD(TAG, "fill_buffer color: %d", color.to_565());
   memset(this->buffer_, color.r + color.b + color.g == 0 ? 0 : 1, this->get_buffer_length());
 }
@@ -68,5 +68,5 @@ size_t Bufferex1bit2color::get_buffer_length() {
 
 size_t Bufferex1bit2color::get_buffer_size() { return this->get_buffer_length(); }
 
-}  // namespace bufferex_1bit_2color
+}  // namespace display
 }  // namespace esphome

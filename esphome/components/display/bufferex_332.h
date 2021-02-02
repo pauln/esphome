@@ -2,9 +2,9 @@
 #include "bufferex_base.h"
 
 namespace esphome {
-namespace bufferex_332 {
+namespace display {
 
-class Bufferex332 : public bufferex_base::BufferexBase {
+class Bufferex332 : public display::BufferexBase {
  public:
   uint8_t *buffer_{nullptr};
 
@@ -16,5 +16,5 @@ class Bufferex332 : public bufferex_base::BufferexBase {
   size_t get_buffer_size() override;
 
 };  // class Bufferex332
-}  // namespace bufferex_332
+}  // namespace display
 }  // namespace esphome
