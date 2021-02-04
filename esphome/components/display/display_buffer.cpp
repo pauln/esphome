@@ -323,8 +323,13 @@ size_t DisplayBuffer::get_buffer_length() { return this->bufferex_base_->get_buf
 void DisplayBuffer::set_pixel(int x, int y, Color color) { this->bufferex_base_->set_pixel(x, y, color); }
 size_t DisplayBuffer::get_buffer_size() { return this->bufferex_base_->get_buffer_size(); }
 void DisplayBuffer::fill_buffer(Color color) { this->bufferex_base_->fill_buffer(color); }
+
+// 565
 uint16_t DisplayBuffer::get_pixel_to_565(int x, int y) { return this->bufferex_base_->get_pixel_to_565(x, y); }
 uint16_t DisplayBuffer::get_pixel_to_565(uint16_t pos) { return this->bufferex_base_->get_pixel_to_565(pos); }
+// 666
+uint32_t DisplayBuffer::get_pixel_to_666(int x, int y) { return this->bufferex_base_->get_pixel_to_666(x, y); }
+uint32_t DisplayBuffer::get_pixel_to_666(uint16_t pos) { return this->bufferex_base_->get_pixel_to_666(pos); }
 
 void DisplayBuffer::show_page(DisplayPage *page) { this->page_ = page; }
 void DisplayBuffer::show_next_page() { this->page_->show_next(); }

@@ -14,13 +14,13 @@ void Bufferex1bit2color::init_buffer(int width, int height) {
     ESP_LOGE(TAG, "Could not allocate buffer for display!");
     return;
   }
-  memset(this->buffer_, 0x00, this->get_buffer_length());
+  memset(this->buffer_, 0x00, this->get_buffer_size());
 }
 
 void Bufferex1bit2color::fill_buffer(Color color) {
   display::BufferexBase::fill_buffer(color);
   ESP_LOGD(TAG, "fill_buffer color: %d", color.to_565());
-  memset(this->buffer_, color.r + color.b + color.g == 0 ? 0 : 1, this->get_buffer_length());
+  memset(this->buffer_, color.r + color.b + color.g == 0 ? 0 : 1, this->get_buffer_size());
 }
 
 uint16_t Bufferex1bit2color::get_pixel_buffer_position_internal_(int x, int y) { return (x + y * this->width_); }
@@ -34,12 +34,26 @@ void HOT Bufferex1bit2color::set_buffer(int x, int y, Color color) {
   this->buffer_[byte_location] = color_byte;
 }
 
-uint16_t Bufferex1bit2color::get_pixel_to_565(int x, int y) {
+uint8_t Bufferex1bit2color::get_color_bit_(int x, int y) {
   const uint16_t byte_location = get_pixel_buffer_position_internal_(x, y) / 8;
   const uint8_t byte_offset = get_pixel_buffer_position_internal_(x, y) - (byte_location * 8);
 
   auto color_byte = this->buffer_[byte_location];
   auto color_bit = (color_byte >> byte_offset) & 1U;
+  return color_bit;
+}
+
+uint8_t Bufferex1bit2color::get_color_bit_(uint16_t pos) {
+  const uint16_t byte_location = pos / 8;
+  const uint8_t byte_offset = pos - (byte_location * 8);
+
+  auto color_byte = this->buffer_[byte_location];
+  auto color_bit = (color_byte >> byte_offset) & 1U;
+  return color_bit;
+}
+
+uint16_t Bufferex1bit2color::get_pixel_to_565(int x, int y) {
+  uint8_t color_bit = this->get_color_bit_(x, y);
 
   if (color_bit == 0)
     return this->color_off_.to_565();
@@ -48,16 +62,30 @@ uint16_t Bufferex1bit2color::get_pixel_to_565(int x, int y) {
 }
 
 uint16_t Bufferex1bit2color::get_pixel_to_565(uint16_t pos) {
-  const uint16_t byte_location = pos / 8;
-  const uint8_t byte_offset = pos - (byte_location * 8);
-
-  auto color_byte = this->buffer_[byte_location];
-  auto color_bit = (color_byte >> byte_offset) & 1U;
+  uint8_t color_bit = this->get_color_bit_(pos);
 
   if (color_bit == 0)
     return this->color_off_.to_565();
 
   return this->color_on_.to_565();
+}
+
+uint32_t Bufferex1bit2color::get_pixel_to_666(int x, int y) {
+  uint8_t color_bit = this->get_color_bit_(x, y);
+
+  if (color_bit == 0)
+    return this->color_off_.to_666();
+
+  return this->color_on_.to_666();
+}
+
+uint32_t Bufferex1bit2color::get_pixel_to_666(uint16_t pos) {
+  uint8_t color_bit = this->get_color_bit_(pos);
+
+  if (color_bit == 0)
+    return this->color_off_.to_666();
+
+  return this->color_on_.to_666();
 }
 
 size_t Bufferex1bit2color::get_buffer_length() {

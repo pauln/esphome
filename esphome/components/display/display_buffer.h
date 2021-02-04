@@ -305,9 +305,22 @@ class DisplayBuffer {
   void set_pixel(int x, int y, Color color);
   size_t get_buffer_size();
   void fill_buffer(Color color);
+
+  // 565
   uint16_t get_pixel_to_565(int x, int y);
   uint16_t get_pixel_to_565(uint16_t pos);
+  // 666
+  uint32_t get_pixel_to_666(int x, int y);
+  uint32_t get_pixel_to_666(uint16_t pos);
+
   void init_buffer(int width, int height);
+  display::BufferType get_buffer_type() { return this->bufferex_base_->get_buffer_type(); };
+  std::string get_buffer_type_string() { return BUFFER_TYPE_STRINGS[this->bufferex_base_->get_buffer_type()]; }
+  uint8_t get_pixel_storage_size() { return this->bufferex_base_->get_pixel_storage_size(); }
+
+  void set_driver_right_bit_aligned(bool driver_right_bit_aligned) {
+    this->bufferex_base_->set_driver_right_bit_aligned(driver_right_bit_aligned);
+  }
 
  protected:
   void vprintf_(int x, int y, Font *font, Color color, TextAlign align, const char *format, va_list arg);

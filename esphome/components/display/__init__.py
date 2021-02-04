@@ -29,12 +29,14 @@ DisplayPageShowPrevAction = display_ns.class_(
 
 bufferex_base = display_ns.class_("BufferexBase")
 bufferex_565 = display_ns.class_("Bufferex565")
+bufferex_666 = display_ns.class_("Bufferex666")
 bufferex_332 = display_ns.class_("Bufferex332")
 bufferex_1bit_2color = display_ns.class_("Bufferex1bit2color")
 
 BufferType = display_ns.enum("BufferType")
 
 TYPES = {
+    "RGB666": BufferType.RGB666,
     "RGB565": BufferType.RGB565,
     "RGB332": BufferType.RGB332,
     "RGB1BIT": BufferType.RGB1BIT,
@@ -111,6 +113,8 @@ def register_display(var, config):
         if CONF_BUFFER not in config:
             config[CONF_BUFFER_ID].type = bufferex_565
         else:
+            if config[CONF_BUFFER][CONF_TYPE] == "RGB666":
+                config[CONF_BUFFER_ID].type = bufferex_666
             if config[CONF_BUFFER][CONF_TYPE] == "RGB565":
                 config[CONF_BUFFER_ID].type = bufferex_565
             elif config[CONF_BUFFER][CONF_TYPE] == "RGB332":

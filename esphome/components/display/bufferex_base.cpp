@@ -15,8 +15,10 @@ void HOT BufferexBase::display() {
 }
 
 void HOT BufferexBase::set_pixel(int x, int y, Color color) {
-  if (x >= this->width_ || x < 0 || y >= this->height_ || y < 0)
+  if (x >= this->width_ || x < 0 || y >= this->height_ || y < 0) {
+    ESP_LOGD(TAG, "set_pixel out of bounds");
     return;
+  }
 
   this->x_low_ = (x < this->x_low_) ? x : this->x_low_;
   this->y_low_ = (y < this->y_low_) ? y : this->y_low_;

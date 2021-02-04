@@ -9,7 +9,7 @@ namespace st7735 {
 static const char *TAG = "st7735";
 
 ST7735::ST7735(ST7735Model model, int width, int height, int colstart, int rowstart, boolean usebgr) {
-  model_ = model;
+  this->model_ = model;
   this->width_ = width;
   this->height_ = height;
   this->colstart_ = colstart;
@@ -18,7 +18,8 @@ ST7735::ST7735(ST7735Model model, int width, int height, int colstart, int rowst
 }
 
 void ST7735::setup() {
-  ESP_LOGCONFIG(TAG, "Setting up ST7735...");
+  ESP_LOGCONFIG(TAG, "Setting up ST7735... %d %d", this->width_, this->height_);
+
   this->spi_setup();
 
   this->dc_pin_->setup();
@@ -30,12 +31,14 @@ void ST7735::setup() {
   this->init_reset_();
   delay(100);  // NOLINT
 
-  ESP_LOGD(TAG, "  START");
-  dump_config();
-  ESP_LOGD(TAG, "  END");
-
-  display_init_(RCMD1);
-
+  if (this->get_pixel_storage_size() < 18) {
+    this->driver_right_bit_aligned_ = true;
+    display_init_(RCMD1);
+  } else {
+    this->driver_right_bit_aligned_ = false;
+    display_init_(RCMD18);
+  }
+  this->init_buffer(this->width_, this->height_);
   if (this->model_ == INITR_GREENTAB) {
     display_init_(RCMD2GREEN);
     colstart_ == 0 ? colstart_ = 2 : colstart_;
@@ -69,19 +72,29 @@ void ST7735::setup() {
   }
   sendcommand_(ST77XX_MADCTL, &data, 1);
 
+  this->set_driver_right_bit_aligned(this->driver_right_bit_aligned_);
   this->init_buffer(this->width_, this->height_);
+
   this->fill_internal_(COLOR_BLACK);
 }
 
 void ST7735::fill_internal_(Color color) {
+  auto color_to_write = this->get_pixel_storage_size() > 16 ? color.to_666(this->driver_right_bit_aligned_)
+                                                            : color.to_565(this->driver_right_bit_aligned_);
+
+  ESP_LOGD(TAG, "Filling w %d h %d", this->get_width_internal(), this->get_height_internal());
   this->set_addr_window_(0, 0, this->get_width_internal(), this->get_height_internal());
   this->start_data_();
 
-  auto color565 = color.to_565();
   for (uint32_t i = 0; i < this->get_buffer_length(); i++) {
-    this->write_byte(color565 >> 8);
-    this->write_byte(color565);
+    if (this->get_pixel_storage_size() > 16) {
+      this->write_byte(color_to_write >> 16);
+    }
+
+    this->write_byte(color_to_write >> 8);
+    this->write_byte(color_to_write);
   }
+
   this->end_data_();
 }
 
@@ -155,8 +168,11 @@ void ST7735::dump_config() {
   LOG_PIN("  CS Pin: ", this->cs_);
   LOG_PIN("  DC Pin: ", this->dc_pin_);
   LOG_PIN("  Reset Pin: ", this->reset_pin_);
+  ESP_LOGD(TAG, "  Buffer Type: %s", this->get_buffer_type_string().c_str());
+  ESP_LOGD(TAG, "  Buffer Type: %d", this->get_buffer_type());
   ESP_LOGD(TAG, "  Buffer Length: %zu", this->get_buffer_length());
   ESP_LOGD(TAG, "  Buffer Size: %zu", this->get_buffer_size());
+  ESP_LOGD(TAG, "  Buffer Pixel Size: %zu", this->get_pixel_storage_size());
   ESP_LOGD(TAG, "  Height: %d", this->height_);
   ESP_LOGD(TAG, "  Width: %d", this->width_);
   ESP_LOGD(TAG, "  ColStart: %d", this->colstart_);
@@ -199,6 +215,7 @@ void HOT ST7735::senddata_(const uint8_t *data_bytes, uint8_t num_data_bytes) {
 
 void HOT ST7735::display_buffer_() {
   ESP_LOGD(TAG, "Asked to write %d pixels", this->pixel_count_);
+
   const int w = this->bufferex_base_->x_high_ - this->bufferex_base_->x_low_ + 1;
   const int h = this->bufferex_base_->y_high_ - this->bufferex_base_->y_low_ + 1;
   const uint32_t start_pos = ((this->bufferex_base_->y_low_ * this->width_) + this->bufferex_base_->x_low_);
@@ -210,12 +227,21 @@ void HOT ST7735::display_buffer_() {
     for (uint16_t col = 0; col < w; col++) {
       uint32_t pos = start_pos + (row * width_) + col;
 
-      auto color = this->get_pixel_to_565(pos);
-      this->write_byte(color >> 8);
-      this->write_byte(color);
+      uint32_t color_to_write = this->get_pixel_storage_size() > 16 ? this->bufferex_base_->get_pixel_to_666(pos)
+                                                                    : this->bufferex_base_->get_pixel_to_565(pos);
+
+      if (this->get_pixel_storage_size() > 16) {
+        this->write_byte(color_to_write >> 14);
+        this->write_byte(color_to_write >> 6);
+        this->write_byte(color_to_write << 2);
+      } else {
+        this->write_byte(color_to_write >> 8);
+        this->write_byte(color_to_write);
+      }
     }
   }
   this->end_data_();
+
   this->pixel_count_ = 0;
 }
 
@@ -247,13 +273,6 @@ void ST7735::set_addr_window_(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h) 
   this->write_byte(ST77XX_RAMWR);
   this->dc_pin_->digital_write(true);
 
-  for (int y = 0; y < this->get_height_internal(); ++y) {
-    for (int x = 0; x < this->get_width_internal(); ++x) {
-      auto color = this->get_pixel_to_565(x, y);
-      this->write_byte((color >> 8) & 0xff);
-      this->write_byte(color & 0xff);
-    }
-  }
   this->disable();
 }
 

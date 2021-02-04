@@ -32,7 +32,12 @@ struct Color {
     uint32_t raw_32;
   };
   enum ColorOrder : uint8_t { COLOR_ORDER_RGB = 0, COLOR_ORDER_BGR = 1, COLOR_ORDER_GRB = 2 };
-  enum ColorBitness : uint8_t { COLOR_BITNESS_888 = 0, COLOR_BITNESS_565 = 1, COLOR_BITNESS_332 = 2 };
+  enum ColorBitness : uint8_t {
+    COLOR_BITNESS_888 = 0,
+    COLOR_BITNESS_565 = 1,
+    COLOR_BITNESS_332 = 2,
+    COLOR_BITNESS_666 = 3
+  };
   inline Color() ALWAYS_INLINE : r(0), g(0), b(0), w(0) {}  // NOLINT
   inline Color(float red, float green, float blue) ALWAYS_INLINE : r(uint8_t(red * 255)),
                                                                    g(uint8_t(green * 255)),
@@ -58,6 +63,11 @@ struct Color {
         first_bits = 8;
         second_bits = 8;
         third_bits = 8;
+        break;
+      case COLOR_BITNESS_666:
+        first_bits = 6;
+        second_bits = 6;
+        third_bits = 6;
         break;
       case COLOR_BITNESS_565:
         first_bits = 5;
@@ -214,20 +224,29 @@ struct Color {
     }
     return 0;
   }
-  uint16_t to_565(ColorOrder color_order = ColorOrder::COLOR_ORDER_RGB) const {
-    uint16_t red_color, green_color, blue_color;
+
+  uint32_t to_565(bool right_bit_aligned) const { return this->to_565(ColorOrder::COLOR_ORDER_RGB, right_bit_aligned); }
+  uint32_t to_565(ColorOrder color_order = ColorOrder::COLOR_ORDER_RGB, bool right_bit_aligned = true) const {
+    uint32_t red_color, green_color, blue_color;
 
     red_color = esp_scale8(this->red, ((1 << 5) - 1));
     green_color = esp_scale8(this->green, ((1 << 6) - 1));
     blue_color = esp_scale8(this->blue, (1 << 5) - 1);
-
+    uint8_t first_shift;
+    uint8_t second_shift;
     switch (color_order) {
       case COLOR_ORDER_RGB:
-        return red_color << 11 | green_color << 5 | blue_color;
+        first_shift = right_bit_aligned ? 11 : 16;
+        second_shift = right_bit_aligned ? 5 : 8;
+        return red_color << first_shift | green_color << second_shift | blue_color;
       case COLOR_ORDER_BGR:
-        return blue_color << 11 | green_color << 5 | red_color;
+        first_shift = right_bit_aligned ? 11 : 16;
+        second_shift = right_bit_aligned ? 5 : 8;
+        return blue_color << first_shift | green_color << second_shift | red_color;
       case COLOR_ORDER_GRB:
-        return green_color << 10 | red_color << 5 | blue_color;
+        first_shift = right_bit_aligned ? 10 : 16;
+        second_shift = right_bit_aligned ? 5 : 8;
+        return green_color << first_shift | red_color << second_shift | blue_color;
     }
     return 0;
   }
@@ -240,6 +259,28 @@ struct Color {
     uint32_t color565 =
         (esp_scale8(this->blue, 31) << 11) | (esp_scale8(this->green, 63) << 5) | (esp_scale8(this->red, 31) << 0);
     return color565;
+  }
+
+  uint32_t to_666(bool right_bit_aligned) const { return this->to_666(ColorOrder::COLOR_ORDER_RGB, right_bit_aligned); }
+  uint32_t to_666(ColorOrder color_order = ColorOrder::COLOR_ORDER_RGB, bool right_bit_aligned = true) const {
+    uint32_t red_color, green_color, blue_color;
+
+    uint8_t first_shift = right_bit_aligned ? 6 : 16;
+    uint8_t second_shift = right_bit_aligned ? 6 : 8;
+
+    red_color = esp_scale8(this->red, ((1 << 6) - 1));
+    green_color = esp_scale8(this->green, ((1 << 6) - 1));
+    blue_color = esp_scale8(this->blue, (1 << 6) - 1);
+
+    switch (color_order) {
+      case COLOR_ORDER_RGB:
+        return red_color << first_shift | green_color << second_shift | blue_color;
+      case COLOR_ORDER_BGR:
+        return blue_color << first_shift | green_color << second_shift | red_color;
+      case COLOR_ORDER_GRB:
+        return green_color << first_shift | red_color << second_shift | blue_color;
+    }
+    return 0;
   }
   uint32_t to_grayscale4() const {
     uint32_t gs4 = esp_scale8(this->white, 15);
