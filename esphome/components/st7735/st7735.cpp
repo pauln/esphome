@@ -172,7 +172,7 @@ void ST7735::dump_config() {
   ESP_LOGD(TAG, "  Buffer Type: %d", this->get_buffer_type());
   ESP_LOGD(TAG, "  Buffer Length: %zu", this->get_buffer_length());
   ESP_LOGD(TAG, "  Buffer Size: %zu", this->get_buffer_size());
-  ESP_LOGD(TAG, "  Buffer Pixel Size: %zu", this->get_pixel_storage_size());
+  ESP_LOGD(TAG, "  Buffer Pixel Size: %hhu", this->get_pixel_storage_size());
   ESP_LOGD(TAG, "  Height: %d", this->height_);
   ESP_LOGD(TAG, "  Width: %d", this->width_);
   ESP_LOGD(TAG, "  ColStart: %d", this->colstart_);
