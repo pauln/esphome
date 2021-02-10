@@ -9,7 +9,7 @@ enum BufferType : uint8_t {
   BUFFER_TYPE_332 = 1,
   BUFFER_TYPE_565 = 2,
   BUFFER_TYPE_666 = 3,
-  BUFFER_TYPE_888 = 4,
+  BUFFER_TYPE_INDEXED = 4,
 };
 static const std::string BUFFER_TYPE_STRINGS[] = {"1BIT", "332", "565", "666", "888"};
 

@@ -7,7 +7,6 @@ static const char *TAG = "bufferex_1bit_2color";
 void Bufferex1bit2color::init_buffer(int width, int height) {
   this->width_ = width;
   this->height_ = height;
-  this->buffer_type_ = display::BufferType::BUFFER_TYPE_1BIT;
 
   this->buffer_ = new uint8_t[this->get_buffer_length()];
   if (this->buffer_ == nullptr) {

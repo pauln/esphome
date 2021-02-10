@@ -10,7 +10,7 @@ CONF_BUFFER = "buffer"
 CONF_COLOR_OFF = "color_off"
 CONF_COLOR_ON = "color_on"
 CONF_BUFFER_ID = "buffer_id"
-
+CONF_INDEX_SIZE = "index_size"
 
 IS_PLATFORM_COMPONENT = True
 
@@ -31,6 +31,7 @@ bufferex_base = display_ns.class_("BufferexBase")
 bufferex_565 = display_ns.class_("Bufferex565")
 bufferex_666 = display_ns.class_("Bufferex666")
 bufferex_332 = display_ns.class_("Bufferex332")
+bufferex_indexed = display_ns.class_("BufferexIndexed")
 bufferex_1bit_2color = display_ns.class_("Bufferex1bit2color")
 
 BufferType = display_ns.enum("BufferType")
@@ -40,6 +41,7 @@ TYPES = {
     "RGB565": BufferType.RGB565,
     "RGB332": BufferType.RGB332,
     "RGB1BIT": BufferType.RGB1BIT,
+    "INDEXED": BufferType.INDEXED,
 }
 BUFFER_TYPES = cv.enum(TYPES, upper=True, space="_")
 
@@ -48,6 +50,7 @@ BASIC_BUFFER_SCHEMA = cv.Schema(
         cv.Required(CONF_TYPE): BUFFER_TYPES,
         cv.Optional(CONF_COLOR_ON): cv.use_id(color),
         cv.Optional(CONF_COLOR_OFF): cv.use_id(color),
+        cv.Optional(CONF_INDEX_SIZE, default=1): cv.uint8_t,
     }
 )
 
@@ -121,6 +124,8 @@ def register_display(var, config):
                 config[CONF_BUFFER_ID].type = bufferex_332
             elif config[CONF_BUFFER][CONF_TYPE] == "RGB1BIT":
                 config[CONF_BUFFER_ID].type = bufferex_1bit_2color
+            elif config[CONF_BUFFER][CONF_TYPE] == "INDEXED":
+                config[CONF_BUFFER_ID].type = bufferex_indexed
 
         buffer = yield cg.new_Pvariable(config[CONF_BUFFER_ID])
         cg.add(var.set_buffer(buffer))
@@ -133,6 +138,10 @@ def register_display(var, config):
             if CONF_COLOR_OFF in config[CONF_BUFFER]:
                 color_off = yield cg.get_variable(config[CONF_BUFFER][CONF_COLOR_OFF])
                 cg.add(buffer.set_color_off(color_off))
+
+        if CONF_BUFFER in config and config[CONF_BUFFER][CONF_TYPE] == "INDEXED":
+            if CONF_INDEX_SIZE in config[CONF_BUFFER]:
+                cg.add(buffer.set_index_size(config[CONF_BUFFER][CONF_INDEX_SIZE]))
 
 
 @automation.register_action(
