@@ -8,6 +8,20 @@ void BufferexIndexed::init_buffer(int width, int height) {
   this->width_ = width;
   this->height_ = height;
 
+#ifdef ARDUINO_ARCH_ESP32
+  uint8_t *psrambuffer = (uint8_t *) malloc(1);  // NOLINT
+
+  if (psrambuffer == nullptr) {
+    ESP_LOGW(TAG, "PSRAM is NOT supported");
+  } else {
+    ESP_LOGW(TAG, "PSRAM is supported");
+    ESP_LOGW(TAG, "Total heap: %d", ESP.getHeapSize());
+    ESP_LOGW(TAG, "Free heap: %d", ESP.getFreeHeap());
+    ESP_LOGW(TAG, "Total PSRAM: %d", ESP.getPsramSize());
+    ESP_LOGW(TAG, "Free PSRAM: %d", ESP.getFreeHeap());
+  }
+#endif
+
   this->buffer_ = new uint8_t[this->get_buffer_length()];
   if (this->buffer_ == nullptr) {
     ESP_LOGE(TAG, "Could not allocate buffer for display!");
@@ -21,26 +35,33 @@ void BufferexIndexed::fill_buffer(Color color) {
   ESP_LOGD(TAG, "fill_buffer color: %d", color.to_565());
   memset(this->buffer_, color.r + color.b + color.g == 0 ? 0 : 1, this->get_buffer_size());
 }
+void HOT BufferexIndexed::set_buffer(int x, int y, Color color) {}
 
-void HOT BufferexIndexed::set_buffer(int x, int y, Color color) {
+void HOT BufferexIndexed::set_buffer(int x, int y, uint8_t index) {
+  uint16_t pos = (x + y * this->width_);
+
   const uint16_t pixel_bit_start = pos * this->pixel_storage_size_;
   const uint16_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
 
   const uint16_t byte_location_start = pixel_bit_start / 8;
   const uint16_t byte_location_end = pixel_bit_end / 8;
 
-  uint8_t index_byte_start = this->buffer_[byte_location_start];
   const uint8_t byte_offset_start = pixel_bit_start - (byte_location_start * 8);
-
-  // const uint16_t byte_location = get_pixel_buffer_position_internal_(x, y) / 8;
-  // const uint8_t byte_offset = get_pixel_buffer_position_internal_(x, y) - (byte_location * 8);
-
-  // uint8_t color_byte = this->buffer_[byte_location];
-  // color_byte ^= (-(color.r + color.b + color.g == 0 ? 0 : 1) ^ color_byte) & (1UL << byte_offset);
-  // this->buffer_[byte_location] = color_byte;
+  uint8_t index_byte_start = this->buffer_[byte_offset_start];
+  uint8_t mask = ((1 << pixel_storage_size_) - 1) << byte_offset_start;
+  index_byte_start = (index_byte_start & ~mask) | ((index << byte_offset_start) & mask);
+  this->buffer_[byte_offset_start] = index_byte_start;
+  if (byte_location_start == byte_location_end) {  // Index is in the same byte
+    return;
+  }
+  const uint8_t byte_offset_end = pixel_bit_end - (byte_location_end * 8);
+  uint8_t index_byte_end = this->buffer_[byte_offset_end];
+  mask = (((uint8_t) 1 << byte_offset_end) - 1) << (byte_offset_end - 1);
+  index_byte_end = (index_byte_end & ~mask) | ((index << (byte_offset_end - 1)) & mask);
+  this->buffer_[byte_offset_end] = index_byte_end;
 }
 
-uint8_t BufferexIndexed::get_index_value_(int x, int y) { return this->get_index_value_((x + y * width_)); }
+uint8_t BufferexIndexed::get_index_value_(int x, int y) { return this->get_index_value_((x + y * this->width_)); }
 
 uint8_t BufferexIndexed::get_index_value_(uint16_t pos) {
   const uint16_t pixel_bit_start = pos * this->pixel_storage_size_;
@@ -55,14 +76,14 @@ uint8_t BufferexIndexed::get_index_value_(uint16_t pos) {
   index_byte_start = (index_byte_start >> byte_offset_start);
 
   if (byte_location_start == byte_location_end) {  // Index is in the same byte
-    const uint8_t mask = 0xFF >> (8 - pixel_storage_size_);
+    const uint8_t mask = 0xFF >> (8 - this->pixel_storage_size_);
     index_byte_start = (index_byte_start & mask);
     return index_byte_start;
   }
   const uint8_t byte_offset_end = pixel_bit_end - (byte_location_end * 8);
   const uint8_t mask = 0xFF >> (8 - byte_offset_end);
   uint8_t index_byte_end = this->buffer_[byte_location_end];
-  index_byte_end = (index_byte_end & mask) << (pixel_storage_size_ - byte_offset_end);
+  index_byte_end = (index_byte_end & mask) << (this->pixel_storage_size_ - byte_offset_end);
   index_byte_end = index_byte_end | index_byte_start;
 
   return index_byte_end;
@@ -120,7 +141,7 @@ size_t BufferexIndexed::get_buffer_length() {  // How many unint8_t bytes does t
 
   auto bufflength = (screensize % 8) ? screensize / 8 + 1 : screensize / 8;
 
-  ESP_LOGD(TAG, "Pixel index size: %zu", this->index_size_);
+  ESP_LOGD(TAG, "Pixel index size: %hhu", this->index_size_);
   ESP_LOGD(TAG, "Total Pixels: %zu", total_pixels);
   ESP_LOGD(TAG, "Pixel Storage Size: %d", this->pixel_storage_size_);
   ESP_LOGD(TAG, "Buffer length %zu", bufflength);

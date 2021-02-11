@@ -17,6 +17,7 @@ class BufferexBase {
  public:
   virtual void init_buffer(int width, int height) = 0;
   virtual void set_buffer(int x, int y, Color color) = 0;
+  virtual void set_buffer(int x, int y, uint8_t index);
 
   // 565
   virtual uint16_t get_pixel_to_565(int x, int y) {
