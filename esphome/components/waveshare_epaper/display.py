@@ -11,6 +11,7 @@ waveshare_epaper_ns = cg.esphome_ns.namespace('waveshare_epaper')
 WaveshareEPaper = waveshare_epaper_ns.class_('WaveshareEPaper', cg.PollingComponent, spi.SPIDevice,
                                              display.DisplayBuffer)
 WaveshareEPaperTypeA = waveshare_epaper_ns.class_('WaveshareEPaperTypeA', WaveshareEPaper)
+WaveshareEPaperTypeF = waveshare_epaper_ns.class_('WaveshareEPaperTypeF', WaveshareEPaper)
 WaveshareEPaper2P7In = waveshare_epaper_ns.class_('WaveshareEPaper2P7In', WaveshareEPaper)
 WaveshareEPaper2P9InB = waveshare_epaper_ns.class_('WaveshareEPaper2P9InB', WaveshareEPaper)
 WaveshareEPaper4P2In = waveshare_epaper_ns.class_('WaveshareEPaper4P2In', WaveshareEPaper)
@@ -20,6 +21,7 @@ WaveshareEPaper7P5InV2 = waveshare_epaper_ns.class_('WaveshareEPaper7P5InV2', Wa
 
 WaveshareEPaperTypeAModel = waveshare_epaper_ns.enum('WaveshareEPaperTypeAModel')
 WaveshareEPaperTypeBModel = waveshare_epaper_ns.enum('WaveshareEPaperTypeBModel')
+WaveshareEPaperTypeFModel = waveshare_epaper_ns.enum('WaveshareEPaperTypeFModel')
 
 MODELS = {
     '1.54in': ('a', WaveshareEPaperTypeAModel.WAVESHARE_EPAPER_1_54_IN),
@@ -30,6 +32,7 @@ MODELS = {
     '2.70in': ('b', WaveshareEPaper2P7In),
     '2.90in-b': ('b', WaveshareEPaper2P9InB),
     '4.20in': ('b', WaveshareEPaper4P2In),
+    '5.65in': ('f', WaveshareEPaperTypeFModel.WAVESHARE_ACEP_5_65_IN),
     '5.83in': ('b', WaveshareEPaper5P8In),
     '7.50in': ('b', WaveshareEPaper7P5In),
     '7.50inv2': ('b', WaveshareEPaper7P5InV2),
@@ -65,6 +68,9 @@ def to_code(config):
     elif model_type == 'b':
         rhs = model.new()
         var = cg.Pvariable(config[CONF_ID], rhs, model)
+    elif model_type == 'f':
+        rhs = WaveshareEPaperTypeF.new(model)
+        var = cg.Pvariable(config[CONF_ID], rhs, WaveshareEPaperTypeF)
     else:
         raise NotImplementedError()
 
