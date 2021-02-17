@@ -1,10 +1,10 @@
-#include "bufferex_indexed.h"
+#include "bufferex_indexed8.h"
 
 namespace esphome {
 namespace display {
-static const char *TAG = "bufferex_indexed";
+static const char *TAG = "bufferex_indexed8";
 
-void BufferexIndexed::init_buffer(int width, int height) {
+void BufferexIndexed8::init_buffer(int width, int height) {
   this->width_ = width;
   this->height_ = height;
 
@@ -29,7 +29,7 @@ void BufferexIndexed::init_buffer(int width, int height) {
   memset(this->buffer_, 0x00, this->get_buffer_size());
 }
 
-void BufferexIndexed::fill_buffer(Color color) {
+void BufferexIndexed8::fill_buffer(Color color) {
   display::BufferexBase::fill_buffer(color);
 
   ESP_LOGD(TAG, "fill_buffer %d", color.b);
@@ -40,7 +40,7 @@ void BufferexIndexed::fill_buffer(Color color) {
   }
 }
 
-void HOT BufferexIndexed::set_buffer(int x, int y, Color color) {
+void HOT BufferexIndexed8::set_buffer(int x, int y, Color color) {
   uint16_t pos = (x + y * this->width_);
   bool debug = false;
 
@@ -79,9 +79,9 @@ void HOT BufferexIndexed::set_buffer(int x, int y, Color color) {
   this->buffer_[byte_location_end] = index_byte_end;
 }
 
-uint8_t HOT BufferexIndexed::get_index_value_(int x, int y) { return this->get_index_value_((x + y * this->width_)); }
+uint8_t HOT BufferexIndexed8::get_index_value_(int x, int y) { return this->get_index_value_((x + y * this->width_)); }
 
-uint8_t HOT BufferexIndexed::get_index_value_(uint16_t pos) {
+uint8_t HOT BufferexIndexed8::get_index_value_(uint16_t pos) {
   const uint16_t pixel_bit_start = pos * this->pixel_storage_size_;
   const uint16_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
 
@@ -111,7 +111,7 @@ uint8_t HOT BufferexIndexed::get_index_value_(uint16_t pos) {
   return index_byte_end;
 }
 
-uint16_t BufferexIndexed::get_pixel_to_565(int x, int y) {
+uint16_t BufferexIndexed8::get_pixel_to_565(int x, int y) {
   uint8_t value = this->get_index_value_(x, y);
 
   if (value > this->index_size_)
@@ -120,7 +120,7 @@ uint16_t BufferexIndexed::get_pixel_to_565(int x, int y) {
   return this->colors_[value].to_565(this->driver_right_bit_aligned_);
 }
 
-uint16_t BufferexIndexed::get_pixel_to_565(uint16_t pos) {
+uint16_t BufferexIndexed8::get_pixel_to_565(uint16_t pos) {
   uint8_t value = this->get_index_value_(pos);
 
   if (value > this->index_size_)
@@ -129,7 +129,7 @@ uint16_t BufferexIndexed::get_pixel_to_565(uint16_t pos) {
   return this->colors_[value].to_565(this->driver_right_bit_aligned_);
 }
 
-uint32_t HOT BufferexIndexed::get_pixel_to_666(int x, int y) {
+uint32_t HOT BufferexIndexed8::get_pixel_to_666(int x, int y) {
   uint8_t value = this->get_index_value_(x, y);
 
   if (x == 0)
@@ -141,7 +141,7 @@ uint32_t HOT BufferexIndexed::get_pixel_to_666(int x, int y) {
   return this->colors_[value].to_666(this->driver_right_bit_aligned_);
 }
 
-uint32_t HOT BufferexIndexed::get_pixel_to_666(uint16_t pos) {
+uint32_t HOT BufferexIndexed8::get_pixel_to_666(uint16_t pos) {
   uint8_t value = this->get_index_value_(pos);
 
   if (value > this->index_size_)
@@ -150,7 +150,7 @@ uint32_t HOT BufferexIndexed::get_pixel_to_666(uint16_t pos) {
   return this->colors_[value].to_666(this->driver_right_bit_aligned_);
 }
 
-size_t BufferexIndexed::get_buffer_length() {  // How many unint8_t bytes does the buffer need
+size_t BufferexIndexed8::get_buffer_length() {  // How many unint8_t bytes does the buffer need
   if (this->get_buffer_length_ != 0)
     return this->get_buffer_length_;
 
@@ -176,7 +176,7 @@ size_t BufferexIndexed::get_buffer_length() {  // How many unint8_t bytes does t
   return bufflength;
 }
 
-size_t BufferexIndexed::get_buffer_size() { return this->get_buffer_length(); }
+size_t BufferexIndexed8::get_buffer_size() { return this->get_buffer_length(); }
 
 }  // namespace display
 }  // namespace esphome

@@ -39,7 +39,7 @@ bufferex_base = display_ns.class_("BufferexBase")
 bufferex_565 = display_ns.class_("Bufferex565")
 bufferex_666 = display_ns.class_("Bufferex666")
 bufferex_332 = display_ns.class_("Bufferex332")
-bufferex_indexed = display_ns.class_("BufferexIndexed")
+bufferex_indexed8 = display_ns.class_("BufferexIndexed8")
 bufferex_1bit_2color = display_ns.class_("Bufferex1bit2color")
 
 BufferType = display_ns.enum("BufferType")
@@ -49,7 +49,7 @@ TYPES = {
     "RGB565": BufferType.RGB565,
     "RGB332": BufferType.RGB332,
     "RGB1BIT": BufferType.RGB1BIT,
-    "INDEXED": BufferType.INDEXED,
+    "INDEXED8": BufferType.INDEXED8,
 }
 BUFFER_TYPES = cv.enum(TYPES, upper=True, space="_")
 
@@ -137,8 +137,8 @@ def register_display(var, config):
                 config[CONF_BUFFER_ID].type = bufferex_332
             elif config[CONF_BUFFER][CONF_TYPE] == "RGB1BIT":
                 config[CONF_BUFFER_ID].type = bufferex_1bit_2color
-            elif config[CONF_BUFFER][CONF_TYPE] == "INDEXED":
-                config[CONF_BUFFER_ID].type = bufferex_indexed
+            elif config[CONF_BUFFER][CONF_TYPE] == "INDEXED8":
+                config[CONF_BUFFER_ID].type = bufferex_indexed8
 
         buffer = yield cg.new_Pvariable(config[CONF_BUFFER_ID])
         cg.add(var.set_buffer(buffer))
@@ -152,7 +152,7 @@ def register_display(var, config):
                 color_off = yield cg.get_variable(config[CONF_BUFFER][CONF_COLOR_OFF])
                 cg.add(buffer.set_color_off(color_off))
 
-        if CONF_BUFFER in config and config[CONF_BUFFER][CONF_TYPE] == "INDEXED":
+        if CONF_BUFFER in config and config[CONF_BUFFER][CONF_TYPE] == "INDEXED8":
             if CONF_INDEX_SIZE in config[CONF_BUFFER]:
                 cg.add(buffer.set_index_size(config[CONF_BUFFER][CONF_INDEX_SIZE]))
 

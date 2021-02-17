@@ -4,7 +4,7 @@
 namespace esphome {
 namespace display {
 
-class BufferexIndexed : public display::BufferexBase {
+class BufferexIndexed8 : public display::BufferexBase {
  public:
   uint8_t *buffer_{nullptr};
 
