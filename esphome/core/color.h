@@ -261,8 +261,10 @@ struct Color {
     return color565;
   }
 
-  uint32_t to_666(bool right_bit_aligned) const { return this->to_666(ColorOrder::COLOR_ORDER_RGB, right_bit_aligned); }
-  uint32_t to_666(ColorOrder color_order = ColorOrder::COLOR_ORDER_RGB, bool right_bit_aligned = true) const {
+  uint32_t HOT to_666(bool right_bit_aligned) const {
+    return this->to_666(ColorOrder::COLOR_ORDER_RGB, right_bit_aligned);
+  }
+  uint32_t HOT to_666(ColorOrder color_order = ColorOrder::COLOR_ORDER_RGB, bool right_bit_aligned = true) const {
     uint32_t red_color, green_color, blue_color;
 
     uint8_t first_shift = right_bit_aligned ? 12 : 16;
