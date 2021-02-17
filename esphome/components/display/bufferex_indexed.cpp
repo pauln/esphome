@@ -44,7 +44,13 @@ void HOT BufferexIndexed::set_buffer(int x, int y, Color color) {
   uint16_t pos = (x + y * this->width_);
   bool debug = false;
 
-  uint8_t index = color.b;
+  uint8_t index = 0;
+  for (int i = 0; i < colors_.size(); i++) {
+    if (colors_[i].r == color.r && colors_[i].g == color.g && colors_[i].b == color.b) {
+      index = i;
+      break;
+    }
+  }
 
   const uint16_t pixel_bit_start = pos * this->pixel_storage_size_;
   const uint16_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
