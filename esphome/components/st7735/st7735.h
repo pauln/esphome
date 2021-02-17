@@ -56,7 +56,7 @@ class ST7735 : public PollingComponent,
   void display_init_(const uint8_t *addr);
   void spi_master_write_addr_(uint16_t addr1, uint16_t addr2);
   void set_addr_window_(uint16_t x1, uint16_t y1, uint16_t w, uint16_t h);
-
+  bool is_18bit_();
   const char *model_str_();
 
   ST7735Model model_{ST7735_INITR_18BLACKTAB};

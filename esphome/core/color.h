@@ -265,7 +265,7 @@ struct Color {
   uint32_t to_666(ColorOrder color_order = ColorOrder::COLOR_ORDER_RGB, bool right_bit_aligned = true) const {
     uint32_t red_color, green_color, blue_color;
 
-    uint8_t first_shift = right_bit_aligned ? 6 : 16;
+    uint8_t first_shift = right_bit_aligned ? 12 : 16;
     uint8_t second_shift = right_bit_aligned ? 6 : 8;
 
     red_color = esp_scale8(this->red, ((1 << 6) - 1));

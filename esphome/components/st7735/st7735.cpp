@@ -31,13 +31,14 @@ void ST7735::setup() {
   this->init_reset_();
   delay(100);  // NOLINT
 
-  if (this->get_pixel_storage_size() < 18) {
-    this->driver_right_bit_aligned_ = true;
-    display_init_(RCMD1);
-  } else {
+  if (this->is_18bit_()) {
     this->driver_right_bit_aligned_ = false;
     display_init_(RCMD18);
+  } else {
+    this->driver_right_bit_aligned_ = true;
+    display_init_(RCMD1);
   }
+
   this->init_buffer(this->width_, this->height_);
   if (this->model_ == INITR_GREENTAB) {
     display_init_(RCMD2GREEN);
@@ -78,16 +79,18 @@ void ST7735::setup() {
   this->fill_internal_(COLOR_BLACK);
 }
 
+bool ST7735::is_18bit_() { return this->get_buffer_type() != display::BufferType::BUFFER_TYPE_565; }
+
 void ST7735::fill_internal_(Color color) {
-  auto color_to_write = this->get_pixel_storage_size() > 16 ? color.to_666(this->driver_right_bit_aligned_)
-                                                            : color.to_565(this->driver_right_bit_aligned_);
+  auto color_to_write =
+      this->is_18bit_() ? color.to_666(this->driver_right_bit_aligned_) : color.to_565(this->driver_right_bit_aligned_);
 
   ESP_LOGD(TAG, "Filling w %d h %d", this->get_width_internal(), this->get_height_internal());
   this->set_addr_window_(0, 0, this->get_width_internal(), this->get_height_internal());
   this->start_data_();
 
   for (uint32_t i = 0; i < this->get_buffer_length(); i++) {
-    if (this->get_pixel_storage_size() > 16) {
+    if (this->is_18bit_()) {
       this->write_byte(color_to_write >> 16);
     }
 
@@ -110,7 +113,7 @@ int ST7735::get_width_internal() { return width_; }
 
 void HOT ST7735::draw_absolute_pixel_internal(int x, int y, Color color) {
   pixel_count_++;
-  this->set_pixel(x, y, color);
+  this->bufferex_base_->set_pixel(x, y, color);
 }
 
 void ST7735::init_reset_() {
@@ -177,6 +180,7 @@ void ST7735::dump_config() {
   ESP_LOGD(TAG, "  Width: %d", this->width_);
   ESP_LOGD(TAG, "  ColStart: %d", this->colstart_);
   ESP_LOGD(TAG, "  RowStart: %d", this->rowstart_);
+  ESP_LOGD(TAG, "  18Bit: %s", this->is_18bit_() ? "True" : "False");
   LOG_UPDATE_INTERVAL(this);
 }
 
@@ -207,7 +211,7 @@ void HOT ST7735::senddata_(const uint8_t *data_bytes, uint8_t num_data_bytes) {
   this->cs_->digital_write(false);
   this->enable();
   for (uint8_t i = 0; i < num_data_bytes; i++) {
-    this->transfer_byte(pgm_read_byte(data_bytes++));  // write byte - SPI library
+    this->write_byte(pgm_read_byte(data_bytes++));  // write byte - SPI library
   }
   this->cs_->digital_write(true);
   this->disable();
@@ -227,10 +231,10 @@ void HOT ST7735::display_buffer_() {
     for (uint16_t col = 0; col < w; col++) {
       uint32_t pos = start_pos + (row * width_) + col;
 
-      uint32_t color_to_write = this->get_pixel_storage_size() > 16 ? this->bufferex_base_->get_pixel_to_666(pos)
-                                                                    : this->bufferex_base_->get_pixel_to_565(pos);
+      uint32_t color_to_write =
+          this->is_18bit_() ? this->bufferex_base_->get_pixel_to_666(pos) : this->bufferex_base_->get_pixel_to_565(pos);
 
-      if (this->get_pixel_storage_size() > 16) {
+      if (this->is_18bit_()) {
         this->write_byte(color_to_write >> 14);
         this->write_byte(color_to_write >> 6);
         this->write_byte(color_to_write << 2);

@@ -2,7 +2,14 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome import core, automation
 from esphome.automation import maybe_simple_id
-from esphome.const import CONF_ID, CONF_LAMBDA, CONF_PAGES, CONF_ROTATION, CONF_TYPE
+from esphome.const import (
+    CONF_ID,
+    CONF_LAMBDA,
+    CONF_PAGES,
+    CONF_ROTATION,
+    CONF_TYPE,
+    CONF_COLORS,
+)
 from esphome.core import coroutine, coroutine_with_priority
 from esphome.components import color
 
@@ -11,6 +18,7 @@ CONF_COLOR_OFF = "color_off"
 CONF_COLOR_ON = "color_on"
 CONF_BUFFER_ID = "buffer_id"
 CONF_INDEX_SIZE = "index_size"
+CONF_COLOR = "color"
 
 IS_PLATFORM_COMPONENT = True
 
@@ -51,6 +59,11 @@ BASIC_BUFFER_SCHEMA = cv.Schema(
         cv.Optional(CONF_COLOR_ON): cv.use_id(color),
         cv.Optional(CONF_COLOR_OFF): cv.use_id(color),
         cv.Optional(CONF_INDEX_SIZE, default=1): cv.uint8_t,
+        cv.Optional(CONF_COLORS): cv.ensure_list(
+            {
+                cv.Required(CONF_COLOR): cv.use_id(color),
+            }
+        ),
     }
 )
 
@@ -142,6 +155,26 @@ def register_display(var, config):
         if CONF_BUFFER in config and config[CONF_BUFFER][CONF_TYPE] == "INDEXED":
             if CONF_INDEX_SIZE in config[CONF_BUFFER]:
                 cg.add(buffer.set_index_size(config[CONF_BUFFER][CONF_INDEX_SIZE]))
+
+            if CONF_COLORS in config[CONF_BUFFER]:
+                colors = []
+                for color_conf in config[CONF_BUFFER][CONF_COLORS]:
+                    color_ = yield cg.get_variable(color_conf[CONF_COLOR])
+                    colors.append(color_)
+
+                cg.add(buffer.set_colors(colors))
+                #     lambda_ = yield cg.process_lambda(
+                #         conf[CONF_LAMBDA],
+                #         [(DisplayBufferRef, "it")],
+                #         return_type=cg.void,
+                #     )
+                #     page = cg.new_Pvariable(conf[CONF_ID], lambda_)
+                #     pages.append(page)
+                # cg.add(var.set_pages(pages))
+
+            # if CONF_COLORS in config[CONF_BUFFER]:
+            #     colors = yield cg.get_variable(config[CONF_BUFFER][CONF_COLORS])
+            #     cg.add(buffer.set_colors(colors))
 
 
 @automation.register_action(

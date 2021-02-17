@@ -10,7 +10,7 @@ class BufferexIndexed : public display::BufferexBase {
 
   void init_buffer(int width, int height) override;
   void set_buffer(int x, int y, Color color) override;
-  void set_buffer(int x, int y, uint8_t index) override;
+
   void fill_buffer(Color color) override;
   uint16_t get_pixel_to_565(int x, int y) override;
   uint16_t get_pixel_to_565(uint16_t pos) override;
