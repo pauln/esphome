@@ -92,7 +92,7 @@ uint8_t HOT BufferexIndexed8::get_index_value_(uint32_t pos) {
 
   uint8_t index_byte_start = this->buffer_[byte_location_start];
   const uint8_t byte_offset_start = pixel_bit_start % 8;
-  
+
   uint8_t mask = (1 << this->pixel_storage_size_) - 1;
 
   index_byte_start = (index_byte_start >> byte_offset_start);
@@ -101,7 +101,7 @@ uint8_t HOT BufferexIndexed8::get_index_value_(uint32_t pos) {
     // Pixel starts and ends in the same byte, so we're done.
     return index_byte_start & mask;
   }
-  
+
   const uint8_t byte_offset_end = pixel_bit_end % 8;
 
   uint8_t end_mask = mask >> (this->pixel_storage_size_ - byte_offset_end);
