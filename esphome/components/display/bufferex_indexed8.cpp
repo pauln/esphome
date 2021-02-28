@@ -58,23 +58,25 @@ void HOT BufferexIndexed8::set_buffer(int x, int y, Color color) {
   const uint32_t byte_location_start = pixel_bit_start / 8;
   const uint32_t byte_location_end = pixel_bit_end / 8;
 
-  const uint8_t byte_offset_start = pixel_bit_start - (byte_location_start * 8);
+  const uint8_t byte_offset_start = pixel_bit_start % 8;
+
   uint8_t index_byte_start = this->buffer_[byte_location_start];
+  uint8_t mask = ((1 << this->pixel_storage_size_) - 1) << byte_offset_start;
 
-  uint8_t mask = ((1 << pixel_storage_size_) - 1) << byte_offset_start;
-
-  index_byte_start = (index_byte_start & ~mask) | (mask == 1 ? mask : ((index << byte_offset_start) & mask));
-
-  const uint8_t byte_offset_end = pixel_bit_end - (byte_location_end * 8);
-
-  uint8_t index_byte_end = this->buffer_[byte_location_end];
-  mask = (((uint8_t) 1 << byte_offset_end) - 1) << (byte_offset_end - 1);
-
-  index_byte_end = (index_byte_end & ~mask) | (index >> (this->pixel_storage_size_ - (byte_offset_end)) & ~mask);
+  index_byte_start = (index_byte_start & ~mask) | ((index << byte_offset_start) & mask);
   this->buffer_[byte_location_start] = index_byte_start;
-  if (byte_location_start == byte_location_end) {  // Index is in the same byte
+
+  if (byte_location_start == byte_location_end) {
+    // Pixel starts and ends in the same byte, so we're done.
     return;
   }
+
+  const uint8_t byte_offset_end = pixel_bit_end % 8;
+
+  uint8_t index_byte_end = this->buffer_[byte_location_end];
+  mask = (((uint8_t) 1 << this->pixel_storage_size_) - 1) >> (this->pixel_storage_size_ - byte_offset_end);
+
+  index_byte_end = (index_byte_end & ~mask) | ((index >> (this->pixel_storage_size_ - byte_offset_end)) & mask);
 
   this->buffer_[byte_location_end] = index_byte_end;
 }
@@ -89,26 +91,28 @@ uint8_t HOT BufferexIndexed8::get_index_value_(uint32_t pos) {
   const uint32_t byte_location_end = pixel_bit_end / 8;
 
   uint8_t index_byte_start = this->buffer_[byte_location_start];
-  const uint8_t byte_offset_start = pixel_bit_start - (byte_location_start * 8);
+  const uint8_t byte_offset_start = pixel_bit_start % 8;
+  
+  uint8_t mask = (1 << this->pixel_storage_size_) - 1;
 
   index_byte_start = (index_byte_start >> byte_offset_start);
 
-  if (byte_location_start == byte_location_end) {  // Index is in the same byte
-    const uint8_t mask = 0xFF >> (8 - this->pixel_storage_size_);
-    index_byte_start = (index_byte_start & mask);
-    return index_byte_start;
+  if (byte_location_start == byte_location_end) {
+    // Pixel starts and ends in the same byte, so we're done.
+    return index_byte_start & mask;
   }
-  const uint8_t byte_offset_end = pixel_bit_end - (byte_location_end * 8);
+  
+  const uint8_t byte_offset_end = pixel_bit_end % 8;
 
-  const uint8_t mask = 0xFF >> (8 - byte_offset_end);
+  uint8_t end_mask = mask >> (this->pixel_storage_size_ - byte_offset_end);
 
   uint8_t index_byte_end = this->buffer_[byte_location_end];
 
-  index_byte_end = (index_byte_end & mask) << (this->pixel_storage_size_ - byte_offset_end);
+  index_byte_end = (index_byte_end & end_mask) << (this->pixel_storage_size_ - byte_offset_end);
 
   index_byte_end = index_byte_end | index_byte_start;
 
-  return index_byte_end;
+  return index_byte_end & mask;
 }
 
 uint16_t BufferexIndexed8::get_pixel_to_565(int x, int y) {
