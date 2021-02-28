@@ -28,15 +28,15 @@ size_t Bufferex565::get_buffer_size() { return this->get_buffer_length() * 2; }
 
 void HOT Bufferex565::set_buffer(int x, int y, Color color) {
   const uint16_t color565 = color.to_565();
-  uint16_t pos = get_pixel_buffer_position_(x, y);
+  uint32_t pos = get_pixel_buffer_position_(x, y);
   this->buffer_[pos] = color565;
 }
 
 // 565
-uint16_t Bufferex565::get_pixel_to_565(uint16_t pos) { return this->buffer_[pos]; }
+uint16_t Bufferex565::get_pixel_to_565(uint32_t pos) { return this->buffer_[pos]; }
 
 // 666
-uint32_t Bufferex565::get_pixel_to_666(uint16_t pos) {
+uint32_t Bufferex565::get_pixel_to_666(uint32_t pos) {
   return Color(this->buffer_[pos], Color::ColorOrder::COLOR_ORDER_RGB, Color::ColorBitness::COLOR_BITNESS_565, true)
       .to_666();
 }

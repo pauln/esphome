@@ -21,17 +21,17 @@ class BufferexBase {
 
   // 565
   virtual uint16_t get_pixel_to_565(int x, int y) {
-    const uint16_t pos = get_pixel_buffer_position_(x, y);
+    const uint32_t pos = get_pixel_buffer_position_(x, y);
     return this->get_pixel_to_565(pos);
   }
-  virtual uint16_t get_pixel_to_565(uint16_t pos) = 0;
+  virtual uint16_t get_pixel_to_565(uint32_t pos) = 0;
 
   // 666
   virtual uint32_t get_pixel_to_666(int x, int y) {
-    const uint16_t pos = get_pixel_buffer_position_(x, y);
+    const uint32_t pos = get_pixel_buffer_position_(x, y);
     return this->get_pixel_to_666(pos);
   };
-  virtual uint32_t get_pixel_to_666(uint16_t pos) = 0;
+  virtual uint32_t get_pixel_to_666(uint32_t pos) = 0;
 
   virtual size_t get_buffer_size() = 0;
   virtual size_t get_buffer_length();
@@ -55,7 +55,7 @@ class BufferexBase {
  protected:
   int16_t width_ = 0, height_ = 0;
   bool driver_right_bit_aligned_ = false;
-  uint16_t get_pixel_buffer_position_(int x, int y) { return (x + y * width_); }
+  uint32_t get_pixel_buffer_position_(int x, int y) { return (x + y * width_); }
   std::vector<Color> colors_;
 };  // class BufferexBase
 }  // namespace display

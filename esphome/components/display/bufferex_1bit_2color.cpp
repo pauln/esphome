@@ -22,10 +22,10 @@ void Bufferex1bit2color::fill_buffer(Color color) {
   memset(this->buffer_, color.r + color.b + color.g == 0 ? 0 : 1, this->get_buffer_size());
 }
 
-uint16_t Bufferex1bit2color::get_pixel_buffer_position_internal_(int x, int y) { return (x + y * this->width_); }
+uint32_t Bufferex1bit2color::get_pixel_buffer_position_internal_(int x, int y) { return (x + y * this->width_); }
 
 void HOT Bufferex1bit2color::set_buffer(int x, int y, Color color) {
-  const uint16_t byte_location = get_pixel_buffer_position_internal_(x, y) / 8;
+  const uint32_t byte_location = get_pixel_buffer_position_internal_(x, y) / 8;
   const uint8_t byte_offset = get_pixel_buffer_position_internal_(x, y) - (byte_location * 8);
 
   uint8_t color_byte = this->buffer_[byte_location];
@@ -34,7 +34,7 @@ void HOT Bufferex1bit2color::set_buffer(int x, int y, Color color) {
 }
 
 uint8_t Bufferex1bit2color::get_color_bit_(int x, int y) {
-  const uint16_t byte_location = get_pixel_buffer_position_internal_(x, y) / 8;
+  const uint32_t byte_location = get_pixel_buffer_position_internal_(x, y) / 8;
   const uint8_t byte_offset = get_pixel_buffer_position_internal_(x, y) - (byte_location * 8);
 
   auto color_byte = this->buffer_[byte_location];
@@ -42,8 +42,8 @@ uint8_t Bufferex1bit2color::get_color_bit_(int x, int y) {
   return color_bit;
 }
 
-uint8_t Bufferex1bit2color::get_color_bit_(uint16_t pos) {
-  const uint16_t byte_location = pos / 8;
+uint8_t Bufferex1bit2color::get_color_bit_(uint32_t pos) {
+  const uint32_t byte_location = pos / 8;
   const uint8_t byte_offset = pos - (byte_location * 8);
 
   auto color_byte = this->buffer_[byte_location];
@@ -60,7 +60,7 @@ uint16_t Bufferex1bit2color::get_pixel_to_565(int x, int y) {
   return this->color_on_.to_565();
 }
 
-uint16_t Bufferex1bit2color::get_pixel_to_565(uint16_t pos) {
+uint16_t Bufferex1bit2color::get_pixel_to_565(uint32_t pos) {
   uint8_t color_bit = this->get_color_bit_(pos);
 
   if (color_bit == 0)
@@ -78,7 +78,7 @@ uint32_t Bufferex1bit2color::get_pixel_to_666(int x, int y) {
   return this->color_on_.to_666();
 }
 
-uint32_t Bufferex1bit2color::get_pixel_to_666(uint16_t pos) {
+uint32_t Bufferex1bit2color::get_pixel_to_666(uint32_t pos) {
   uint8_t color_bit = this->get_color_bit_(pos);
 
   if (color_bit == 0)

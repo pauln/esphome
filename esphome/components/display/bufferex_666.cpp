@@ -26,7 +26,7 @@ void Bufferex666::fill_buffer(Color color) {
 size_t Bufferex666::get_buffer_size() { return this->get_buffer_length() * 4; }
 
 void HOT Bufferex666::set_buffer(int x, int y, Color color) {
-  uint16_t pos = get_pixel_buffer_position_(x, y);
+  uint32_t pos = get_pixel_buffer_position_(x, y);
   const uint32_t color666 = color.to_666(this->driver_right_bit_aligned_);
   // if (y == 0) {
   //   ESP_LOGD(TAG, "set_buffer color666 %d", color666);
@@ -35,14 +35,14 @@ void HOT Bufferex666::set_buffer(int x, int y, Color color) {
 }
 
 // 565
-uint16_t Bufferex666::get_pixel_to_565(uint16_t pos) {
+uint16_t Bufferex666::get_pixel_to_565(uint32_t pos) {
   return Color(this->buffer_[pos], Color::ColorOrder::COLOR_ORDER_RGB, Color::ColorBitness::COLOR_BITNESS_666,
                this->driver_right_bit_aligned_)
       .to_565();
 }
 
 // 666
-uint32_t Bufferex666::get_pixel_to_666(uint16_t pos) { return this->buffer_[pos]; }
+uint32_t Bufferex666::get_pixel_to_666(uint32_t pos) { return this->buffer_[pos]; }
 
 }  // namespace display
 }  // namespace esphome

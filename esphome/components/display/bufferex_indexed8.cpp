@@ -41,7 +41,7 @@ void BufferexIndexed8::fill_buffer(Color color) {
 }
 
 void HOT BufferexIndexed8::set_buffer(int x, int y, Color color) {
-  uint16_t pos = (x + y * this->width_);
+  uint32_t pos = (x + y * this->width_);
   bool debug = false;
 
   uint8_t index = 0;
@@ -52,11 +52,11 @@ void HOT BufferexIndexed8::set_buffer(int x, int y, Color color) {
     }
   }
 
-  const uint16_t pixel_bit_start = pos * this->pixel_storage_size_;
-  const uint16_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
+  const uint32_t pixel_bit_start = pos * this->pixel_storage_size_;
+  const uint32_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
 
-  const uint16_t byte_location_start = pixel_bit_start / 8;
-  const uint16_t byte_location_end = pixel_bit_end / 8;
+  const uint32_t byte_location_start = pixel_bit_start / 8;
+  const uint32_t byte_location_end = pixel_bit_end / 8;
 
   const uint8_t byte_offset_start = pixel_bit_start - (byte_location_start * 8);
   uint8_t index_byte_start = this->buffer_[byte_location_start];
@@ -81,12 +81,12 @@ void HOT BufferexIndexed8::set_buffer(int x, int y, Color color) {
 
 uint8_t HOT BufferexIndexed8::get_index_value_(int x, int y) { return this->get_index_value_((x + y * this->width_)); }
 
-uint8_t HOT BufferexIndexed8::get_index_value_(uint16_t pos) {
-  const uint16_t pixel_bit_start = pos * this->pixel_storage_size_;
-  const uint16_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
+uint8_t HOT BufferexIndexed8::get_index_value_(uint32_t pos) {
+  const uint32_t pixel_bit_start = pos * this->pixel_storage_size_;
+  const uint32_t pixel_bit_end = pixel_bit_start + this->pixel_storage_size_;
 
-  const uint16_t byte_location_start = pixel_bit_start / 8;
-  const uint16_t byte_location_end = pixel_bit_end / 8;
+  const uint32_t byte_location_start = pixel_bit_start / 8;
+  const uint32_t byte_location_end = pixel_bit_end / 8;
 
   uint8_t index_byte_start = this->buffer_[byte_location_start];
   const uint8_t byte_offset_start = pixel_bit_start - (byte_location_start * 8);
@@ -120,7 +120,7 @@ uint16_t BufferexIndexed8::get_pixel_to_565(int x, int y) {
   return this->colors_[value].to_565(this->driver_right_bit_aligned_);
 }
 
-uint16_t BufferexIndexed8::get_pixel_to_565(uint16_t pos) {
+uint16_t BufferexIndexed8::get_pixel_to_565(uint32_t pos) {
   uint8_t value = this->get_index_value_(pos);
 
   if (value > this->index_size_)
@@ -141,7 +141,7 @@ uint32_t HOT BufferexIndexed8::get_pixel_to_666(int x, int y) {
   return this->colors_[value].to_666(this->driver_right_bit_aligned_);
 }
 
-uint32_t HOT BufferexIndexed8::get_pixel_to_666(uint16_t pos) {
+uint32_t HOT BufferexIndexed8::get_pixel_to_666(uint32_t pos) {
   uint8_t value = this->get_index_value_(pos);
 
   if (value > this->index_size_)

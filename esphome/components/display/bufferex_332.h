@@ -11,8 +11,8 @@ class Bufferex332 : public display::BufferexBase {
   void init_buffer(int width, int height) override;
   void set_buffer(int x, int y, Color color) override;
   void fill_buffer(Color color) override;
-  uint16_t get_pixel_to_565(uint16_t pos) override;
-  uint32_t get_pixel_to_666(uint16_t pos) override;
+  uint16_t get_pixel_to_565(uint32_t pos) override;
+  uint32_t get_pixel_to_666(uint32_t pos) override;
   size_t get_buffer_size() override;
   display::BufferType get_buffer_type() override { return this->buffer_type_; }
   uint8_t get_pixel_storage_size() override { return this->pixel_storage_size_; }
