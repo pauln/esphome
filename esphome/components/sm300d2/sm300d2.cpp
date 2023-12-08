@@ -7,24 +7,57 @@ namespace sm300d2 {
 static const char *const TAG = "sm300d2";
 static const uint8_t SM300D2_RESPONSE_LENGTH = 17;
 
-void SM300D2Sensor::update() {
-  uint8_t response[SM300D2_RESPONSE_LENGTH];
-  uint8_t peeked;
-
-  while (this->available() > 0 && this->peek_byte(&peeked) && peeked != 0x3C)
-    this->read();
-
-  bool read_success = read_array(response, SM300D2_RESPONSE_LENGTH);
-
-  if (!read_success) {
-    ESP_LOGW(TAG, "Reading data from SM300D2 failed!");
-    status_set_warning();
+void SM300D2Sensor::loop() {
+  if (this->updating_) {
+    // Don't try to read while processing an update.
     return;
   }
+  while (this->available()) {
+    uint8_t c;
+    this->read_byte(&c);
+    if (!this->receiving_) {
+      if (c != 0x3C)
+        continue;
+      this->receiving_ = true;
+      this->data_.clear();
+    }
+
+    if (this->data_.size() == 1 && c != 0x02) {
+      ESP_LOGD(TAG, "First preamble byte found, but next byte didn't match preamble");
+      this->data_.clear();
+      this->receiving_ = false;
+      return;
+    }
+
+    this->data_.push_back(c);
+
+    if (this->data_.size() == SM300D2_RESPONSE_LENGTH) {
+      this->receiving_ = false;
+      return;
+    }
+  }
+}
+
+void SM300D2Sensor::update() {
+  this->updating_ = true;
+
+  // If we're receiving, wait until done.
+  while (this->receiving_);
+
+  if (this->data_.size() != SM300D2_RESPONSE_LENGTH) {
+    // No update to process.
+    ESP_LOGD(TAG, "No data available to process");
+    this->updating_ = false;
+    return;
+  }
+
+  uint8_t response[SM300D2_RESPONSE_LENGTH];
+  std::copy(this->data_.begin(), this->data_.end(), response);
 
   if (response[0] != 0x3C || response[1] != 0x02) {
     ESP_LOGW(TAG, "Invalid preamble for SM300D2 response!");
     this->status_set_warning();
+    this->updating_ = false;
     return;
   }
 
@@ -37,6 +70,7 @@ void SM300D2Sensor::update() {
     ESP_LOGW(TAG, "SM300D2 Checksum doesn't match: 0x%02X!=0x%02X", response[SM300D2_RESPONSE_LENGTH - 1],
              calculated_checksum);
     this->status_set_warning();
+    this->updating_ = false;
     return;
   }
 
@@ -82,6 +116,9 @@ void SM300D2Sensor::update() {
   ESP_LOGD(TAG, "Received Humidity: %.2f percent", humidity);
   if (this->humidity_sensor_ != nullptr)
     this->humidity_sensor_->publish_state(humidity);
+
+  // Mark as done updating, so loop() can read again.
+  this->updating_ = false;
 }
 
 uint16_t SM300D2Sensor::sm300d2_checksum_(uint8_t *ptr) {

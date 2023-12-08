@@ -19,11 +19,15 @@ class SM300D2Sensor : public PollingComponent, public uart::UARTDevice {
   void set_temperature_sensor(sensor::Sensor *temperature_sensor) { temperature_sensor_ = temperature_sensor; }
   void set_humidity_sensor(sensor::Sensor *humidity_sensor) { humidity_sensor_ = humidity_sensor; }
 
+  void loop() override;
   void update() override;
   void dump_config() override;
 
  protected:
   uint16_t sm300d2_checksum_(uint8_t *ptr);
+  std::vector<uint8_t> data_;
+  bool receiving_;
+  bool updating_;
 
   sensor::Sensor *co2_sensor_{nullptr};
   sensor::Sensor *formaldehyde_sensor_{nullptr};
