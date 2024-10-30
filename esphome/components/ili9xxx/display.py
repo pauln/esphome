@@ -84,7 +84,7 @@ COLOR_ORDERS = {
     "BGR": ColorOrder.COLOR_ORDER_BGR,
 }
 
-COLOR_PALETTE = cv.one_of("NONE", "GRAYSCALE", "IMAGE_ADAPTIVE")
+COLOR_PALETTE = cv.one_of("NONE", "GRAYSCALE", "IMAGE_ADAPTIVE", "8BIT")
 
 CONF_LED_PIN = "led_pin"
 CONF_COLOR_PALETTE_IMAGES = "color_palette_images"
@@ -253,6 +253,8 @@ async def to_code(config):
         rhs = []
         for x in range(256):
             rhs.extend([HexInt(x), HexInt(x), HexInt(x)])
+    elif config[CONF_COLOR_PALETTE] == "8BIT":
+        cg.add(var.set_buffer_color_mode(ILI9XXXColorMode.BITS_8))
     elif config[CONF_COLOR_PALETTE] == "IMAGE_ADAPTIVE":
         cg.add(var.set_buffer_color_mode(ILI9XXXColorMode.BITS_8_INDEXED))
         from PIL import Image
