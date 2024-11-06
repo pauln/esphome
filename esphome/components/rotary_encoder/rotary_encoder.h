@@ -24,17 +24,26 @@ enum RotaryEncoderResolution {
   ROTARY_ENCODER_4_PULSES_PER_CYCLE = 0x1100,  /// increment counter by 4 with every A-B cycle, most inaccurate
 };
 
+/// All possible step modes for the rotary encoder
+enum RotaryEncoderStepMode {
+  ROTARY_ENCODER_STEP_MODE_PULSE, // Count pulses to determine steps/direction
+  ROTARY_ENCODER_STEP_MODE_EDGE, // Count edges, rather than pulses
+};
+
 struct RotaryEncoderSensorStore {
   ISRInternalGPIOPin pin_a;
   ISRInternalGPIOPin pin_b;
 
   volatile int32_t counter{0};
   RotaryEncoderResolution resolution{ROTARY_ENCODER_1_PULSE_PER_CYCLE};
+  RotaryEncoderStepMode step_mode{ROTARY_ENCODER_STEP_MODE_PULSE};
   int32_t min_value{INT32_MIN};
   int32_t max_value{INT32_MAX};
   int32_t last_read{0};
   uint8_t state{0};
   bool first_read{true};
+  bool prev_pin_a_state{false};
+  bool prev_pin_b_state{false};
 
   std::array<int8_t, 8> rotation_events{};
   bool rotation_events_overflow{false};
@@ -64,6 +73,15 @@ class RotaryEncoderSensor : public sensor::Sensor, public Component {
    * @param mode The new mode of the encoder.
    */
   void set_resolution(RotaryEncoderResolution mode);
+
+  /** Set the step mode of the rotary encoder.
+   *
+   * By default, this component will use pulses to detect steps/direction.
+   * You can change this behavior to detect edges instead, for encoders which generate edges rather than pulses.
+   *
+   * @param mode The new step mode of the encoder.
+   */
+  void set_step_mode(RotaryEncoderStepMode mode);
 
   /// Manually set the value of the counter.
   void set_value(int value) {

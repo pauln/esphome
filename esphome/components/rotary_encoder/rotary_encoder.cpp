@@ -92,6 +92,7 @@ void IRAM_ATTR HOT RotaryEncoderSensorStore::gpio_intr(RotaryEncoderSensorStore 
 
   int8_t rotation_dir = 0;
   uint16_t new_state = STATE_LOOKUP_TABLE[input_state];
+  ESP_LOGD(TAG, "%X -> %X", input_state, new_state);
   if ((new_state & arg->resolution & STATE_HAS_INCREMENTED) != 0) {
     if (arg->counter < arg->max_value)
       arg->counter++;
@@ -184,6 +185,17 @@ void RotaryEncoderSensor::dump_config() {
       ESP_LOGCONFIG(TAG, "  Resolution: 4 Pulse Per Cycle");
       break;
   }
+
+  const LogString *step_mode = LOG_STR("");
+  switch (this->store_.step_mode) {
+    case ROTARY_ENCODER_STEP_MODE_PULSE:
+      step_mode = LOG_STR("Pulse");
+      break;
+    case ROTARY_ENCODER_STEP_MODE_EDGE:
+      step_mode = LOG_STR("Edge");
+      break;
+  }
+  ESP_LOGCONFIG(TAG, "  Step Mode: %s", LOG_STR_ARG(step_mode));
 }
 void RotaryEncoderSensor::loop() {
   std::array<int8_t, 8> rotation_events;
@@ -236,6 +248,7 @@ void RotaryEncoderSensor::set_restore_mode(RotaryEncoderRestoreMode restore_mode
   this->restore_mode_ = restore_mode;
 }
 void RotaryEncoderSensor::set_resolution(RotaryEncoderResolution mode) { this->store_.resolution = mode; }
+void RotaryEncoderSensor::set_step_mode(RotaryEncoderStepMode mode) { this->store_.step_mode = mode; }
 void RotaryEncoderSensor::set_min_value(int32_t min_value) { this->store_.min_value = min_value; }
 void RotaryEncoderSensor::set_max_value(int32_t max_value) { this->store_.max_value = max_value; }
 

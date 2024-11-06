@@ -14,6 +14,7 @@ from esphome.const import (
     CONF_PIN_B,
     CONF_TRIGGER_ID,
     CONF_RESTORE_MODE,
+    CONF_STEP_MODE,
 )
 
 rotary_encoder_ns = cg.esphome_ns.namespace("rotary_encoder")
@@ -29,6 +30,12 @@ RESOLUTIONS = {
     1: RotaryEncoderResolution.ROTARY_ENCODER_1_PULSE_PER_CYCLE,
     2: RotaryEncoderResolution.ROTARY_ENCODER_2_PULSES_PER_CYCLE,
     4: RotaryEncoderResolution.ROTARY_ENCODER_4_PULSES_PER_CYCLE,
+}
+
+RotaryEncoderStepMode = rotary_encoder_ns.enum("RotaryEncoderStepMode")
+STEP_MODES = {
+    "PULSE": RotaryEncoderStepMode.ROTARY_ENCODER_STEP_MODE_PULSE,
+    "EDGE": RotaryEncoderStepMode.ROTARY_ENCODER_STEP_MODE_EDGE,
 }
 
 CONF_PIN_RESET = "pin_reset"
@@ -75,6 +82,7 @@ CONFIG_SCHEMA = cv.All(
             cv.Required(CONF_PIN_B): cv.All(pins.internal_gpio_input_pin_schema),
             cv.Optional(CONF_PIN_RESET): pins.internal_gpio_output_pin_schema,
             cv.Optional(CONF_RESOLUTION, default=1): cv.enum(RESOLUTIONS, int=True),
+            cv.Optional(CONF_STEP_MODE, default="PULSE"): cv.enum(STEP_MODES, upper=True, space="_"),
             cv.Optional(CONF_MIN_VALUE): cv.int_,
             cv.Optional(CONF_MAX_VALUE): cv.int_,
             cv.Optional(CONF_PUBLISH_INITIAL_VALUE, default=False): cv.boolean,
@@ -117,6 +125,7 @@ async def to_code(config):
         pin_i = await cg.gpio_pin_expression(config[CONF_PIN_RESET])
         cg.add(var.set_reset_pin(pin_i))
     cg.add(var.set_resolution(config[CONF_RESOLUTION]))
+    cg.add(var.set_step_mode(config[CONF_STEP_MODE]))
     if CONF_MIN_VALUE in config:
         cg.add(var.set_min_value(config[CONF_MIN_VALUE]))
     if CONF_MAX_VALUE in config:
